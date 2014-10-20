@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
@@ -37,9 +38,39 @@ namespace Microsoft.AspNet.Mvc
                 [NotNull] IModelValidatorProvider validatorProvider)
             where TModel : class
         {
+            return await TryUpdateModelAsync(
+                model,
+                prefix,
+                httpContext,
+                modelState,
+                metadataProvider,
+                modelBinder,
+                valueProvider,
+                validatorProvider,
+                includeProperties: null,
+                excludeProperties: null);
+        }
+
+        public static async Task<bool> TryUpdateModelAsync<TModel>(
+               [NotNull] TModel model,
+               [NotNull] string prefix,
+               [NotNull] HttpContext httpContext,
+               [NotNull] ModelStateDictionary modelState,
+               [NotNull] IModelMetadataProvider metadataProvider,
+               [NotNull] IModelBinder modelBinder,
+               [NotNull] IValueProvider valueProvider,
+               [NotNull] IModelValidatorProvider validatorProvider, 
+               string[] includeProperties, 
+               string[] excludeProperties)
+           where TModel : class
+        {
             var modelMetadata = metadataProvider.GetMetadataForType(
                 modelAccessor: null,
                 modelType: typeof(TModel));
+
+            Predicate<string> propertyFilter = 
+                propertyName =>
+                        BindAttribute.IsPropertyAllowed(propertyName, includeProperties, excludeProperties);
 
             var modelBindingContext = new ModelBindingContext
             {
@@ -52,7 +83,8 @@ namespace Microsoft.AspNet.Mvc
                 ValidatorProvider = validatorProvider,
                 MetadataProvider = metadataProvider,
                 FallbackToEmptyPrefix = true,
-                HttpContext = httpContext
+                HttpContext = httpContext,
+                PropertyFilter = propertyFilter
             };
 
             if (await modelBinder.BindModelAsync(modelBindingContext))

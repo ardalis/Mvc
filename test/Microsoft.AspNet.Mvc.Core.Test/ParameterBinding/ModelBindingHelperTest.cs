@@ -16,7 +16,6 @@ namespace Microsoft.AspNet.Mvc.Core.Test
 {
     public class ModelBindingHelperTest
     {
-  
         [Fact]
         public async Task TryUpdateModel_ReturnsFalse_IfBinderReturnsFalse()
         {
@@ -125,7 +124,7 @@ namespace Microsoft.AspNet.Mvc.Core.Test
         }
 
         [Fact]
-        public async Task TryUpdateModel_UsingIncludeExcludeOverload_ReturnsFalse_IfBinderReturnsFalse()
+        public async Task TryUpdateModel_UsingIncludePredicateOverload_ReturnsFalse_IfBinderReturnsFalse()
         {
             // Arrange
             var metadataProvider = new Mock<IModelMetadataProvider>();
@@ -137,9 +136,9 @@ namespace Microsoft.AspNet.Mvc.Core.Test
             binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
                   .Returns(Task.FromResult(false));
             var model = new MyModel();
-            var includeProperties = new[] { "IncludedProperty" };
-            var excludeProperties = new[] { "ExcludedProperty" };
-
+            Func<string, bool> includePredicate =
+               propertyName => string.Equals(propertyName, "IncludedProperty", StringComparison.OrdinalIgnoreCase) &&
+                               !string.Equals(propertyName, "ExcludedProperty", StringComparison.OrdinalIgnoreCase);
             // Act
             var result = await ModelBindingHelper.TryUpdateModelAsync(
                                                     model,
@@ -150,8 +149,7 @@ namespace Microsoft.AspNet.Mvc.Core.Test
                                                     GetCompositeBinder(binder.Object),
                                                     Mock.Of<IValueProvider>(),
                                                     Mock.Of<IModelValidatorProvider>(),
-                                                    includeProperties: includeProperties,
-                                                    excludeProperties: excludeProperties);
+                                                    includePredicate);
 
             // Assert
             Assert.False(result);
@@ -162,7 +160,7 @@ namespace Microsoft.AspNet.Mvc.Core.Test
         }
 
         [Fact]
-        public async Task TryUpdateModel_UsingIncludeExcludeOverload_ReturnsTrue_ModelBindsAndValidatesSuccessfully()
+        public async Task TryUpdateModel_UsingIncludePredicateOverload_ReturnsTrue_ModelBindsAndValidatesSuccessfully()
         {
             // Arrange
             var binders = new IModelBinder[]
@@ -188,8 +186,10 @@ namespace Microsoft.AspNet.Mvc.Core.Test
                 { "ExcludedProperty", "ExcludedPropertyValue" }
             };
 
-            var includeProperties = new[] { "IncludedProperty", "MyProperty" };
-            var excludeProperties = new[] { "ExcludedProperty" };
+            Func<string, bool> includePredicate =
+                propertyName => (string.Equals(propertyName, "IncludedProperty", StringComparison.OrdinalIgnoreCase) ||
+                                string.Equals(propertyName, "MyProperty", StringComparison.OrdinalIgnoreCase)) &&
+                                !string.Equals(propertyName, "ExcludedProperty", StringComparison.OrdinalIgnoreCase);
 
             var valueProvider = new DictionaryBasedValueProvider<TestValueBinderMetadata>(values);
 
@@ -202,9 +202,8 @@ namespace Microsoft.AspNet.Mvc.Core.Test
                                                     new DataAnnotationsModelMetadataProvider(),
                                                     GetCompositeBinder(binders),
                                                     valueProvider,
-                                                    validator, 
-                                                    includeProperties,
-                                                    excludeProperties);
+                                                    validator,
+                                                    includePredicate);
 
             // Assert
             Assert.True(result);

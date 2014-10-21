@@ -2,41 +2,36 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.ModelBinding;
 
 namespace ModelBindingWebSite.Controllers
 {
-    public class TryUpdateModelController : Controller
+    public class TryUpdateModel2Controller : Controller
     {
-        public async Task<User> GetUserAsync(int id)
+        public async Task<User> GetUserAsync_IncludeAllByDefault(int id)
         {
             var user = GetUser(id);
-            var bindingContext = await BindingContextProvider.GetActionBindingContextAsync(ActionContext);
+
+            await TryUpdateModelAsync<User>(user, string.Empty);
+            return user;
+        }
+
+        public async Task<User> GetUserAsync_ExcludeSpecificProperties(int id)
+        {
+            var user = GetUser(id);
             await TryUpdateModelAsync(user,
                                       prefix: string.Empty,
-                                      valueProvider: bindingContext.ValueProvider,
-                                      includeExpressions: model => model.RegisterationMonth);
+                                      includePredicate: modelName => !string.Equals(modelName, nameof(User.Id),StringComparison.Ordinal) &&
+                                                                      !string.Equals(modelName, nameof(User.Key), StringComparison.Ordinal)
+                                      );
 
             return user;
         }
 
-        public async Task<User> GetUserAsync_IncludeListNull(int id)
-        {
-            var user = GetUser(id);
-            Func<string, bool> includePredicate =
-               propertyName => !string.Equals(propertyName, "Id", StringComparison.OrdinalIgnoreCase) &&
-                               !string.Equals(propertyName, "Key", StringComparison.OrdinalIgnoreCase);
-
-            await TryUpdateModelAsync(user,
-                                      prefix: string.Empty,
-                                      includePredicate: includePredicate);
-
-            return user;
-        }
-
-        public async Task<User> GetUserAsync_ExcludeListNull(int id)
+        public async Task<User> GetUserAsync_IncludeSpecificProperties(int id)
         {
             var user = GetUser(id);
             await TryUpdateModelAsync(user,

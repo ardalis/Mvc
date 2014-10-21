@@ -12,6 +12,21 @@ namespace MvcSample.Web
         private static readonly IEnumerable<SelectListItem> _addresses = CreateAddresses();
         private static readonly IEnumerable<SelectListItem> _ages = CreateAges();
 
+        public ActionResult AjaxPage()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult MyAjaxCall([FromBody] WrapperObject obj)
+        {
+            return Json("ok");
+        }
+
+        public class WrapperObject
+        {
+            public string Order { get; set; }
+        }
         public ActionResult Index()
         {
             return View("MyView", CreateUser());

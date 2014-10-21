@@ -693,12 +693,16 @@ namespace Microsoft.AspNet.Mvc.Test
             binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
                   .Callback((ModelBindingContext b) =>
                   {
-                      Assert.Equal(string.Empty, b.ModelName);
+                      Assert.Empty(b.ModelName);
                       Assert.Same(valueProvider, b.ValueProvider);
+
+                      // Include and exclude should be null, resulting in property
+                      // being included.
+                      Assert.True(b.PropertyFilter("Foo"));
                   })
                   .Returns(Task.FromResult(false))
                   .Verifiable();
-            var model = new MyModel();
+
             var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
             var bindingContext = new ActionBindingContext(actionContext,
                                                           metadataProvider,
@@ -709,6 +713,7 @@ namespace Microsoft.AspNet.Mvc.Test
             var bindingContextProvider = new Mock<IActionBindingContextProvider>();
             bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
                                   .Returns(Task.FromResult(bindingContext));
+
             var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
             var controller = new Controller
             {
@@ -716,6 +721,8 @@ namespace Microsoft.AspNet.Mvc.Test
                 BindingContextProvider = bindingContextProvider.Object,
                 ViewData = viewData
             };
+
+            var model = new MyModel();
 
             // Act
             var result = await controller.TryUpdateModelAsync(model);
@@ -727,19 +734,24 @@ namespace Microsoft.AspNet.Mvc.Test
         [Fact]
         public async Task TryUpdateModel_UsesModelTypeNameIfSpecified()
         {
+            var modelName = "mymodel";
+
             var metadataProvider = new DataAnnotationsModelMetadataProvider();
             var valueProvider = Mock.Of<IValueProvider>();
             var binder = new Mock<IModelBinder>();
-            var modelName = "mymodel";
             binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
                   .Callback((ModelBindingContext b) =>
                   {
                       Assert.Equal(modelName, b.ModelName);
                       Assert.Same(valueProvider, b.ValueProvider);
+
+                      // Include and exclude should be null, resulting in property
+                      // being included.
+                      Assert.True(b.PropertyFilter("Foo"));
                   })
                   .Returns(Task.FromResult(false))
                   .Verifiable();
-            var model = new MyModel();
+
             var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
             var bindingContext = new ActionBindingContext(actionContext,
                                                           metadataProvider,
@@ -750,6 +762,7 @@ namespace Microsoft.AspNet.Mvc.Test
             var bindingContextProvider = new Mock<IActionBindingContextProvider>();
             bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
                                   .Returns(Task.FromResult(bindingContext));
+
             var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
             var controller = new Controller
             {
@@ -757,6 +770,8 @@ namespace Microsoft.AspNet.Mvc.Test
                 BindingContextProvider = bindingContextProvider.Object,
                 ViewData = viewData
             };
+
+            var model = new MyModel();
 
             // Act
             var result = await controller.TryUpdateModelAsync(model, modelName);
@@ -768,29 +783,35 @@ namespace Microsoft.AspNet.Mvc.Test
         [Fact]
         public async Task TryUpdateModel_UsesModelValueProviderIfSpecified()
         {
-            var metadataProvider = new DataAnnotationsModelMetadataProvider();
+            var modelName = "mymodel";
+
             var valueProvider = Mock.Of<IValueProvider>();
             var binder = new Mock<IModelBinder>();
-            var modelName = "mymodel";
             binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
                   .Callback((ModelBindingContext b) =>
                   {
                       Assert.Equal(modelName, b.ModelName);
                       Assert.Same(valueProvider, b.ValueProvider);
+
+                      // Include and exclude should be null, resulting in property
+                      // being included.
+                      Assert.True(b.PropertyFilter("Foo"));
                   })
                   .Returns(Task.FromResult(false))
                   .Verifiable();
-            var model = new MyModel();
+
             var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
+            var metadataProvider = new DataAnnotationsModelMetadataProvider();
             var bindingContext = new ActionBindingContext(actionContext,
                                                           metadataProvider,
                                                           binder.Object,
-                                                          Mock.Of<IValueProvider>(),
+                                                          Mock.Of<IValueProvider>(), // Notice the use of mock VP here.
                                                           Mock.Of<IInputFormatterSelector>(),
                                                           Mock.Of<IModelValidatorProvider>());
             var bindingContextProvider = new Mock<IActionBindingContextProvider>();
             bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
                                   .Returns(Task.FromResult(bindingContext));
+
             var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
             var controller = new Controller
             {
@@ -798,6 +819,8 @@ namespace Microsoft.AspNet.Mvc.Test
                 BindingContextProvider = bindingContextProvider.Object,
                 ViewData = viewData
             };
+
+            var model = new MyModel();
 
             // Act
             var result = await controller.TryUpdateModelAsync(model, modelName, valueProvider);
@@ -807,20 +830,23 @@ namespace Microsoft.AspNet.Mvc.Test
         }
        
         [Fact]
-        public async Task TryUpdateModelIncludeAndExlcudePropertiesOverload_IncludesAndExcludesProperties()
+        public async Task TryUpdateModel_IncludePredicateOverload_UsesIncludeProperties_IfSpecified()
         {
-            var metadataProvider = new DataAnnotationsModelMetadataProvider();
-            var valueProvider = Mock.Of<IValueProvider>();
-            var binder = new Mock<IModelBinder>();
             var modelName = "mymodel";
+
             var includeProperties = new[] { "include1", "include2" };
+            Func<string, bool> includePredicate = 
+                propertyName => string.Equals(propertyName, "include1", StringComparison.OrdinalIgnoreCase) || 
+                                string.Equals(propertyName, "include2", StringComparison.OrdinalIgnoreCase);
             var excludeProperties = new[] { "exclude1", "exclude2" };
 
+            var binder = new Mock<IModelBinder>();
+            var valueProvider = Mock.Of<IValueProvider>();
             binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
                   .Callback((ModelBindingContext b) =>
                   {
                       Assert.Equal(modelName, b.ModelName);
-
+                      Assert.Same(valueProvider, b.ValueProvider);
                       foreach (var item in includeProperties)
                       {
                           Assert.True(b.PropertyFilter(item));
@@ -833,7 +859,8 @@ namespace Microsoft.AspNet.Mvc.Test
                   })
                   .Returns(Task.FromResult(true))
                   .Verifiable();
-            var model = new MyModel();
+
+            var metadataProvider = new DataAnnotationsModelMetadataProvider();
             var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
             var bindingContext = new ActionBindingContext(actionContext,
                                                           metadataProvider,
@@ -844,6 +871,7 @@ namespace Microsoft.AspNet.Mvc.Test
             var bindingContextProvider = new Mock<IActionBindingContextProvider>();
             bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
                                   .Returns(Task.FromResult(bindingContext));
+
             var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
             var controller = new Controller
             {
@@ -852,12 +880,190 @@ namespace Microsoft.AspNet.Mvc.Test
                 ViewData = viewData
             };
 
+            var model = new MyModel();
+
             // Act
-            await controller.TryUpdateModelAsync(model, modelName, includeProperties, excludeProperties, valueProvider);
+            await controller.TryUpdateModelAsync(model, modelName, includePredicate);
 
             // Assert
             binder.Verify();
         }
+
+        [Fact]
+        public async Task TryUpdateModel_IncludePredicateWithValueProviderOverload_UsesIncludeAndValueProvider_IfSpecified()
+        {
+            var modelName = "mymodel";
+
+            var includeProperties = new[] { "include1", "include2" };
+            Func<string, bool> includePredicate =
+               propertyName => string.Equals(propertyName, "include1", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(propertyName, "include2", StringComparison.OrdinalIgnoreCase);
+            var excludeProperties = new[] { "exclude1", "exclude2" };
+
+            var binder = new Mock<IModelBinder>();
+            var valueProvider = Mock.Of<IValueProvider>();
+            binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
+                  .Callback((ModelBindingContext b) =>
+                  {
+                      Assert.Equal(modelName, b.ModelName);
+                      Assert.Same(valueProvider, b.ValueProvider);
+                      foreach (var item in includeProperties)
+                      {
+                          Assert.True(b.PropertyFilter(item));
+                      }
+
+                      foreach (var item in excludeProperties)
+                      {
+                          Assert.False(b.PropertyFilter(item));
+                      }
+                  })
+                  .Returns(Task.FromResult(true))
+                  .Verifiable();
+
+            var metadataProvider = new DataAnnotationsModelMetadataProvider();
+            var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
+            var bindingContext = new ActionBindingContext(actionContext,
+                                                          metadataProvider,
+                                                          binder.Object,
+                                                          Mock.Of<IValueProvider>(), // Notice the use of mock VP here.
+                                                          Mock.Of<IInputFormatterSelector>(),
+                                                          Mock.Of<IModelValidatorProvider>());
+            var bindingContextProvider = new Mock<IActionBindingContextProvider>();
+            bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
+                                  .Returns(Task.FromResult(bindingContext));
+
+            var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
+            var controller = new Controller
+            {
+                ActionContext = actionContext,
+                BindingContextProvider = bindingContextProvider.Object,
+                ViewData = viewData
+            };
+
+            var model = new MyModel();
+
+            // Act
+            await controller.TryUpdateModelAsync(model, modelName, valueProvider, includePredicate);
+
+            // Assert
+            binder.Verify();
+        }
+
+        [Fact]
+        public async Task TryUpdateModel_IncludeExpressionOverload_UsesIncludeProperties_IfSpecified()
+        {
+            var modelName = "mymodel";
+
+            var includeProperties = new[] { "foo", "bar" };
+            var excludeProperties = new[] { "exclude1", "exclude2" };
+
+            var binder = new Mock<IModelBinder>();
+            var valueProvider = Mock.Of<IValueProvider>();
+            binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
+                  .Callback((ModelBindingContext b) =>
+                  {
+                      Assert.Equal(modelName, b.ModelName);
+                      Assert.Same(valueProvider, b.ValueProvider);
+                      foreach (var item in includeProperties)
+                      {
+                          Assert.True(b.PropertyFilter(item));
+                      }
+
+                      foreach (var item in excludeProperties)
+                      {
+                          Assert.False(b.PropertyFilter(item));
+                      }
+                  })
+                  .Returns(Task.FromResult(true))
+                  .Verifiable();
+
+            var metadataProvider = new DataAnnotationsModelMetadataProvider();
+            var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
+            var bindingContext = new ActionBindingContext(actionContext,
+                                                          metadataProvider,
+                                                          binder.Object,
+                                                          valueProvider,
+                                                          Mock.Of<IInputFormatterSelector>(),
+                                                          Mock.Of<IModelValidatorProvider>());
+            var bindingContextProvider = new Mock<IActionBindingContextProvider>();
+            bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
+                                  .Returns(Task.FromResult(bindingContext));
+
+            var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
+            var controller = new Controller
+            {
+                ActionContext = actionContext,
+                BindingContextProvider = bindingContextProvider.Object,
+                ViewData = viewData
+            };
+
+            var model = new MyModel();
+
+            // Act
+            await controller.TryUpdateModelAsync(model, modelName, m => m.Foo, m => m.Bar);
+
+            // Assert
+            binder.Verify();
+        }
+
+        [Fact]
+        public async Task TryUpdateModel_IncludeExpressionWithValueProviderOverload_UsesIncludeAndValueProvider_IfSpecified()
+        {
+            var modelName = "mymodel";
+
+            var includeProperties = new[] { "foo", "bar" };
+           
+            var excludeProperties = new[] { "exclude1", "exclude2" };
+
+            var binder = new Mock<IModelBinder>();
+            var valueProvider = Mock.Of<IValueProvider>();
+            binder.Setup(b => b.BindModelAsync(It.IsAny<ModelBindingContext>()))
+                  .Callback((ModelBindingContext b) =>
+                  {
+                      Assert.Equal(modelName, b.ModelName);
+                      Assert.Same(valueProvider, b.ValueProvider);
+                      foreach (var item in includeProperties)
+                      {
+                          Assert.True(b.PropertyFilter(item));
+                      }
+
+                      foreach (var item in excludeProperties)
+                      {
+                          Assert.False(b.PropertyFilter(item));
+                      }
+                  })
+                  .Returns(Task.FromResult(true))
+                  .Verifiable();
+
+            var metadataProvider = new DataAnnotationsModelMetadataProvider();
+            var actionContext = new ActionContext(Mock.Of<HttpContext>(), new RouteData(), new ActionDescriptor());
+            var bindingContext = new ActionBindingContext(actionContext,
+                                                          metadataProvider,
+                                                          binder.Object,
+                                                          Mock.Of<IValueProvider>(), // Notice the use of mock VP here.
+                                                          Mock.Of<IInputFormatterSelector>(),
+                                                          Mock.Of<IModelValidatorProvider>());
+            var bindingContextProvider = new Mock<IActionBindingContextProvider>();
+            bindingContextProvider.Setup(b => b.GetActionBindingContextAsync(actionContext))
+                                  .Returns(Task.FromResult(bindingContext));
+
+            var viewData = new ViewDataDictionary(metadataProvider, new ModelStateDictionary());
+            var controller = new Controller
+            {
+                ActionContext = actionContext,
+                BindingContextProvider = bindingContextProvider.Object,
+                ViewData = viewData
+            };
+
+            var model = new MyModel();
+
+            // Act
+            await controller.TryUpdateModelAsync(model, modelName, valueProvider, m => m.Foo, m => m.Bar);
+
+            // Assert
+            binder.Verify();
+        }
+
 #endif
 
         [Fact]
@@ -1020,6 +1226,7 @@ namespace Microsoft.AspNet.Mvc.Test
         private class MyModel
         {
             public string Foo { get; set; }
+            public string Bar { get; set; }
         }
 
         private class DisposableController : Controller

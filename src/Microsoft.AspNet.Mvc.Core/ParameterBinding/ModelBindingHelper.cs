@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc.ModelBinding;
@@ -47,8 +46,7 @@ namespace Microsoft.AspNet.Mvc
                 modelBinder,
                 valueProvider,
                 validatorProvider,
-                includeProperties: null,
-                excludeProperties: null);
+                includePredicate: null);
         }
 
         public static async Task<bool> TryUpdateModelAsync<TModel>(
@@ -59,18 +57,13 @@ namespace Microsoft.AspNet.Mvc
                [NotNull] IModelMetadataProvider metadataProvider,
                [NotNull] IModelBinder modelBinder,
                [NotNull] IValueProvider valueProvider,
-               [NotNull] IModelValidatorProvider validatorProvider, 
-               string[] includeProperties, 
-               string[] excludeProperties)
+               [NotNull] IModelValidatorProvider validatorProvider,
+               Func<string, bool> includePredicate)
            where TModel : class
         {
             var modelMetadata = metadataProvider.GetMetadataForType(
-                modelAccessor: null,
-                modelType: typeof(TModel));
-
-            Predicate<string> propertyFilter = 
-                propertyName =>
-                        BindAttribute.IsPropertyAllowed(propertyName, includeProperties, excludeProperties);
+               modelAccessor: null,
+               modelType: typeof(TModel));
 
             var modelBindingContext = new ModelBindingContext
             {
@@ -84,7 +77,7 @@ namespace Microsoft.AspNet.Mvc
                 MetadataProvider = metadataProvider,
                 FallbackToEmptyPrefix = true,
                 HttpContext = httpContext,
-                PropertyFilter = propertyFilter
+                PropertyFilter = includePredicate
             };
 
             if (await modelBinder.BindModelAsync(modelBindingContext))

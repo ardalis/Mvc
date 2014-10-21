@@ -37,6 +37,9 @@
             <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
         </footer>
     </div>
+
+    <script src="~/scripts/jquery/js/jquery.js"></script>
+    @RenderSection("scripts", required: false)
     @await RenderSectionAsync("footer", required: false)
 </body>
 </html>

@@ -370,7 +370,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                 "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
 
             // Assert
-            var user = JsonConvert.DeserializeObject<ModelBindingWebSite.Controllers.User>(response);
+            var user = JsonConvert.DeserializeObject<User>(response);
 
             // Should not update excluded properties.
             Assert.NotEqual(123, user.Key);
@@ -392,7 +392,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                 "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
 
             // Assert
-            var user = JsonConvert.DeserializeObject<ModelBindingWebSite.Controllers.User>(response);
+            var user = JsonConvert.DeserializeObject<User>(response);
 
             // Should not update excluded properties.
             Assert.NotEqual(123, user.Key);
@@ -415,7 +415,7 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                 "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
 
             // Assert
-            var user = JsonConvert.DeserializeObject<ModelBindingWebSite.Controllers.User>(response);
+            var user = JsonConvert.DeserializeObject<User>(response);
 
             // Should Update all explicitly included properties.
             Assert.Equal("March", user.RegisterationMonth);
@@ -436,12 +436,128 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
                 "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
 
             // Assert
-            var user = JsonConvert.DeserializeObject<ModelBindingWebSite.Controllers.User>(response);
+            var user = JsonConvert.DeserializeObject<User>(response);
 
             // Should Update all properties.
             Assert.Equal(123, user.Key);
             Assert.Equal("March", user.RegisterationMonth);
             Assert.Equal("SomeName", user.UserName);
         }
+
+        [Fact]
+        public async Task TryUpdateModel_FailsToUpdateProperties()
+        {
+            // Arrange
+            var server = TestServer.Create(_services, _app);
+            var client = server.CreateClient();
+
+            // Act
+            var response = await client.GetStringAsync("http://localhost/TryUpdateModel/" +
+                "TryUpdateModelFails" +
+                "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
+
+            // Assert
+            var result = JsonConvert.DeserializeObject<bool>(response);
+
+            // Act
+            Assert.False(result);
+        }
+
+
+
+        #region TryUpdate2
+
+        //[Fact]
+        //public async Task TryUpdateModelWithIncludeExcludeProperties_UpdatesProperties()
+        //{
+        //    // Arrange
+        //    var server = TestServer.Create(_services, _app);
+        //    var client = server.CreateClient();
+
+        //    // Act
+        //    var response = await client.GetStringAsync("http://localhost/TryUpdateModel/" +
+        //        "GetUserAsync" +
+        //        "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
+
+        //    // Assert
+        //    var user = JsonConvert.DeserializeObject<User>(response);
+
+        //    // Should not update excluded properties.
+        //    Assert.NotEqual(123, user.Key);
+
+        //    // Should updateIncluded porperties.
+        //    Assert.Equal("March", user.RegisterationMonth);
+        //}
+
+        //[Fact]
+        //public async Task TryUpdateModelWithNullIncludeProperties_UpdatesAllNonExcludedProperties()
+        //{
+        //    // Arrange
+        //    var server = TestServer.Create(_services, _app);
+        //    var client = server.CreateClient();
+
+        //    // Act
+        //    var response = await client.GetStringAsync("http://localhost/TryUpdateModel/" +
+        //        "GetUserAsync_IncludeListNull" +
+        //        "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
+
+        //    // Assert
+        //    var user = JsonConvert.DeserializeObject<User>(response);
+
+        //    // Should not update excluded properties.
+        //    Assert.NotEqual(123, user.Key);
+
+        //    // Should Update all properties which are not explicitly excluded.
+        //    Assert.Equal("March", user.RegisterationMonth);
+        //    Assert.Equal("SomeName", user.UserName);
+        //}
+
+        [Fact]
+        public async Task TryUpdateModelExcludeSpecfic_Properties()
+        {
+            // Arrange
+            var server = TestServer.Create(_services, _app);
+            var client = server.CreateClient();
+
+            // Act
+            var response = await client.GetStringAsync("http://localhost/TryUpdateModel2/" +
+                "GetUserAsync_ExcludeSpecificProperties" +
+                "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
+
+            // Assert
+            var user = JsonConvert.DeserializeObject<User>(response);
+
+            // Should not update excluded properties.
+            Assert.NotEqual(123, user.Key);
+
+            // Should Update all explicitly included properties.
+            Assert.Equal("March", user.RegisterationMonth);
+            Assert.Equal("SomeName", user.UserName);
+        }
+
+        [Fact]
+        public async Task TryUpdateModelIncludeSpecfic_Properties()
+        {
+            // Arrange
+            var server = TestServer.Create(_services, _app);
+            var client = server.CreateClient();
+
+            // Act
+            var response = await client.GetStringAsync("http://localhost/TryUpdateModel2/" +
+                "GetUserAsync_IncludeSpecificProperties" +
+                "?id=123&RegisterationMonth=March&Key=123&UserName=SomeName");
+
+            // Assert
+            var user = JsonConvert.DeserializeObject<User>(response);
+
+            // Should not update any not explicitly mentioned properties. 
+            Assert.NotEqual("SomeName", user.UserName);
+            Assert.NotEqual(123, user.Key);
+
+            // Should Update all included properties.
+            Assert.Equal("March", user.RegisterationMonth);
+        }
+
+        #endregion
     }
 }

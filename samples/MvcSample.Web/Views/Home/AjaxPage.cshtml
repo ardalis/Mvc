@@ -1,0 +1,31 @@
+﻿@{
+    ViewBag.Title = "AjaxPage";
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $("#ajaxCall").click(function(){
+        $.ajax({
+            url: '/Home/MyAjaxCall',
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            data: JSON.stringify({ order: 'Client_Call' }),
+            success: function(data)
+            { },
+            error: function(data)
+            {
+            }
+        });
+        });
+
+    });
+
+    </script>
+}
+<h2>AjaxPage</h2>
+
+<input type="button" id="ajaxCall" value="GetData" />
+

@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.Mvc
 
         internal static ModelBindingContext GetModelBindingContext(ModelMetadata modelMetadata, ActionBindingContext actionBindingContext)
         {
-            Predicate<string> propertyFilter =
+            Func<string, bool> propertyFilter =
                 propertyName => BindAttribute.IsPropertyAllowed(propertyName,
                                                                 modelMetadata.IncludedProperties,
                                                                 modelMetadata.ExcludedProperties);

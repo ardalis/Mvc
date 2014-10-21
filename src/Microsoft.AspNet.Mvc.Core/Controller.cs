@@ -12,6 +12,10 @@ using Microsoft.Framework.DependencyInjection;
 using Microsoft.AspNet.Mvc.ModelBinding;
 using Microsoft.AspNet.Mvc.Rendering;
 using Microsoft.AspNet.Routing;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Linq.Expressions;
+using System.Linq;
 
 namespace Microsoft.AspNet.Mvc
 {
@@ -658,7 +662,7 @@ namespace Microsoft.AspNet.Mvc
         /// </summary>
         /// <typeparam name="TModel">The type of the model object.</typeparam>
         /// <param name="model">The model instance to update.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
+        /// <returns>true if the update is successful; otherwise, false.</returns>
         [NonAction]
         public virtual Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model)
             where TModel : class
@@ -673,107 +677,10 @@ namespace Microsoft.AspNet.Mvc
         /// <typeparam name="TModel">The type of the model object.</typeparam>
         /// <param name="model">The model instance to update.</param>
         /// <param name="prefix">The prefix to use when looking up values in the value provider.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
+        /// <returns>true if the update is successful; otherwise, false.</returns>
         [NonAction]
         public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string prefix)
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model, prefix, includeProperties: null, excludeProperties: null);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the value provider.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="valueProvider">The value provider used for looking up values.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    [NotNull] IValueProvider valueProvider)
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model,
-                                             prefix: null,
-                                             valueProvider: valueProvider);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the controller's current value provider
-        /// and included properties. 
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="includeProperties">A list of properties of the model to update.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    [NotNull] string[] includeProperties)
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model,
-                                             prefix: null,
-                                             includeProperties: includeProperties,
-                                             excludeProperties: null);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the value provider
-        /// and a list of properties to include.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="includeProperties">A list of properties of the model to update.</param>
-        /// <param name="valueProvider">The value provider used for looking up values.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string[] includeProperties,
-                                                                    [NotNull] IValueProvider valueProvider)
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model,
-                                             prefix: null,
-                                             includeProperties: includeProperties,
-                                             excludeProperties: null,
-                                             valueProvider: valueProvider);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the value provider
-        /// and a list of properties to include.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="prefix">The prefix to use when looking up values in the value provider.</param>
-        /// <param name="includeProperties">A list of properties of the model to update.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string prefix,
-                                                                    string[] includeProperties) 
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model, prefix, includeProperties, excludeProperties: null);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the controller's current value provider,
-        /// a prefix, a list of properties to exclude, and a list of properties to include.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="prefix">The prefix to use when looking up values in the value provider.</param>
-        /// <param name="includeProperties">A list of properties of the model to update.</param>
-        /// <param name="excludeProperties">A list of properties to explicitly exclude from the update.
-        /// These are excluded even if they are listed in the includeProperties parameter list.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string prefix,
-                                                                    string[] includeProperties,
-                                                                    string[] excludeProperties) 
+                                                                    [NotNull] string prefix)
             where TModel : class
         {
             if (BindingContextProvider == null)
@@ -783,11 +690,7 @@ namespace Microsoft.AspNet.Mvc
             }
 
             var bindingContext = await BindingContextProvider.GetActionBindingContextAsync(ActionContext);
-            return await TryUpdateModelAsync(model,
-                                             prefix,
-                                             includeProperties,
-                                             excludeProperties,
-                                             bindingContext.ValueProvider);
+            return await TryUpdateModelAsync(model, prefix, bindingContext.ValueProvider);
         }
 
         /// <summary>
@@ -797,61 +700,10 @@ namespace Microsoft.AspNet.Mvc
         /// <param name="model">The model instance to update.</param>
         /// <param name="prefix">The prefix to use when looking up values in the value provider.</param>
         /// <param name="valueProvider">The value provider used for looking up values.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
+        /// <returns>true if the update is successful; otherwise, false.</returns>
         [NonAction]
         public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string prefix,
-                                                                    [NotNull] IValueProvider valueProvider)
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model,
-                                             prefix,
-                                             includeProperties: null,
-                                             excludeProperties: null,
-                                             valueProvider: valueProvider);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the value provider,
-        /// a prefix, and included properties.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="prefix">The prefix to use when looking up values in the value provider.</param>
-        /// <param name="includeProperties">A list of properties of the model to update.</param>
-        /// <param name="valueProvider">The value provider used for looking up values.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string prefix,
-                                                                    string[] includeProperties,
-                                                                    [NotNull] IValueProvider valueProvider)
-            where TModel : class
-        {
-            return await TryUpdateModelAsync(model,
-                                             prefix,
-                                             includeProperties,
-                                             excludeProperties: null,
-                                             valueProvider: valueProvider);
-        }
-
-        /// <summary>
-        /// Updates the specified model instance using values from the value provider,
-        /// a prefix, a list of properties to exclude , and a list of properties to include.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model object.</typeparam>
-        /// <param name="model">The model instance to update.</param>
-        /// <param name="prefix">The prefix to use when looking up values in the value provider.</param>
-        /// <param name="includeProperties">A list of properties of the model to update.</param>
-        /// <param name="excludeProperties">A list of properties to explicitly exclude from the update.
-        /// These are excluded even if they are listed in the includeProperties parameter list.</param>
-        /// <param name="valueProvider">The value provider used for looking up values.</param>
-        /// <returns>True if the update is successful; otherwise, false.</returns>
-        [NonAction]
-        public virtual async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
-                                                                    string prefix,
-                                                                    string[] includeProperties,
-                                                                    string[] excludeProperties,
+                                                                    [NotNull] string prefix,
                                                                     [NotNull] IValueProvider valueProvider)
             where TModel : class
         {
@@ -869,9 +721,118 @@ namespace Microsoft.AspNet.Mvc
                                                                 bindingContext.MetadataProvider,
                                                                 bindingContext.ModelBinder,
                                                                 valueProvider,
+                                                                bindingContext.ValidatorProvider);
+        }
+
+        [NonAction]
+        public async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
+                                                            string prefix,
+                                                            params Expression<Func<TModel, object>>[] includeExpressions)
+           where TModel : class
+        {
+            var includePredicates = ConvertIncludeExpressionToIncludePredicate(includeExpressions).ToArray();
+            Func<string, bool> includePredicate1 = modelName => includePredicates.Any(includePredicate => includePredicate(modelName));
+            return await TryUpdateModelAsync(model, prefix, includePredicate1);
+        }
+
+        [NonAction]
+        public async Task<bool> TryUpdateModelAsync<TModel>(TModel model, string prefix, Func<string, bool> includePredicate)
+            where TModel : class
+        {
+            if (BindingContextProvider == null)
+            {
+                var message = Resources.FormatPropertyOfTypeCannotBeNull("BindingContextProvider", GetType().FullName);
+                throw new InvalidOperationException(message);
+            }
+
+            var bindingContext = await BindingContextProvider.GetActionBindingContextAsync(ActionContext);
+            return await ModelBindingHelper.TryUpdateModelAsync(model,
+                                                                prefix,
+                                                                ActionContext.HttpContext,
+                                                                ModelState,
+                                                                bindingContext.MetadataProvider,
+                                                                bindingContext.ModelBinder,
+                                                                bindingContext.ValueProvider,
                                                                 bindingContext.ValidatorProvider,
-                                                                includeProperties,
-                                                                excludeProperties);
+                                                                includePredicate);
+        }
+
+
+        [NonAction]
+        public async Task<bool> TryUpdateModelAsync<TModel>([NotNull] TModel model,
+                                                            string prefix,
+                                                            IValueProvider valueProvider,
+                                                            params Expression<Func<TModel, object>>[] includeExpressions)
+           where TModel : class
+        {
+            var includePredicates = ConvertIncludeExpressionToIncludePredicate(includeExpressions).ToArray();
+            Func<string, bool> includePredicate1 = modelName => includePredicates.Any(includePredicate => includePredicate(modelName));
+            return await TryUpdateModelAsync(model, prefix, valueProvider, includePredicate1);
+        }
+
+        [NonAction]
+        public async Task<bool> TryUpdateModelAsync<TModel>(TModel model, string prefix, IValueProvider valueProvider, Func<string, bool> includePredicate)
+            where TModel : class
+        {
+            if (BindingContextProvider == null)
+            {
+                var message = Resources.FormatPropertyOfTypeCannotBeNull("BindingContextProvider", GetType().FullName);
+                throw new InvalidOperationException(message);
+            }
+
+            var bindingContext = await BindingContextProvider.GetActionBindingContextAsync(ActionContext);
+            return await ModelBindingHelper.TryUpdateModelAsync(model,
+                                                                prefix,
+                                                                ActionContext.HttpContext,
+                                                                ModelState,
+                                                                bindingContext.MetadataProvider,
+                                                                bindingContext.ModelBinder,
+                                                                valueProvider,
+                                                                bindingContext.ValidatorProvider,
+                                                                includePredicate);
+        }
+
+        private IEnumerable<Func<string, bool>> ConvertIncludeExpressionToIncludePredicate<TModel>(Expression<Func<TModel, object>>[] x)
+        {
+            foreach (var item in x)
+            {
+                var property = GetProperties(item.Body)
+                                    .Aggregate(string.Empty,
+                                               (agg, propInfo) => agg += propInfo.Name + ".",
+                                               agg => agg.TrimEnd('.'));
+
+                yield return modelName => string.Equals(modelName, property, StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        private static IEnumerable<PropertyInfo> GetProperties(Expression expression)
+        {
+            var originalExpression = expression;
+
+            // For Boxed Value Types 
+            var convertExpression = expression as UnaryExpression;
+            if (convertExpression != null)
+            {
+                originalExpression = convertExpression.Operand;
+            }
+
+            var memberExpression = originalExpression as MemberExpression;
+            if (memberExpression == null)
+            {
+                yield break;
+            }
+
+            var property = memberExpression.Member as PropertyInfo;
+            if (property == null)
+            {
+                throw new InvalidOperationException("Expression is not a property accessor");
+            }
+            foreach (var propertyInfo in GetProperties(memberExpression.Expression))
+            {
+                yield return propertyInfo;
+            }
+
+            yield return property;
         }
 
         [NonAction]

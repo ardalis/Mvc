@@ -13,6 +13,24 @@ namespace Microsoft.AspNet.Mvc
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, AllowMultiple = false, Inherited = true)]
     public sealed class BindAttribute : Attribute, IModelNameProvider, IModelPropertyBindingInfo
     {
+
+        public BindAttribute()
+        {
+
+        }
+
+        public BindAttribute(string predicateExpressionsPropertyName, string predicatePropertyName)
+        {
+        }
+
+        public Type PredicateProviderType { get; set; }
+
+        public object[] PredicateExpressions { get; set; }
+
+        public string PredicateExpressionPropertyName { get; set; }
+
+        public string PredicatePropertyName { get; set; }
+
         /// <summary>
         /// Comma separated set of properties which are to be excluded during model binding.
         /// </summary>

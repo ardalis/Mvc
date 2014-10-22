@@ -1,8 +1,12 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+using System.Xml;
+using System.Xml.Linq;
 using Microsoft.AspNet.Mvc.ModelBinding;
 using Microsoft.AspNet.Mvc.Razor;
+using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.AspNet.Mvc
@@ -112,6 +116,27 @@ namespace Microsoft.AspNet.Mvc
             Assert.Equal(2, mvcOptions.ModelValidatorProviders.Count);
             Assert.IsType<DataAnnotationsModelValidatorProvider>(mvcOptions.ModelValidatorProviders[0].Instance);
             Assert.IsType<DataMemberModelValidatorProvider>(mvcOptions.ModelValidatorProviders[1].Instance);
+        }
+
+        [Fact]
+        public void Setup_SetsUpExcludeFromValidationDelegates()
+        {
+            // Arrange
+            var mvcOptions = new MvcOptions();
+            var setup = new MvcOptionsSetup();
+
+            // Act
+            setup.Configure(mvcOptions);
+
+            // Assert
+            Assert.Equal(5, mvcOptions.ExcludeFromValidationDelegates.Count);
+
+            // Verify if the delegates registered by default exclude the given types. 
+            Assert.True(mvcOptions.ExcludeFromValidationDelegates[0](typeof(XObject)));
+            Assert.True(mvcOptions.ExcludeFromValidationDelegates[1](typeof(Type)));
+            Assert.True(mvcOptions.ExcludeFromValidationDelegates[2](typeof(byte[])));
+            Assert.True(mvcOptions.ExcludeFromValidationDelegates[3](typeof(JToken)));
+            Assert.True(mvcOptions.ExcludeFromValidationDelegates[4](typeof(XmlNode)));
         }
     }
 }

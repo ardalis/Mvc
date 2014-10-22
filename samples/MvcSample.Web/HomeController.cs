@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Rendering;
@@ -15,6 +16,13 @@ namespace MvcSample.Web
         public ActionResult Index()
         {
             return View("MyView", CreateUser());
+        }
+
+        public IActionResult Contact([FromBody] XmlDocument xdoc)
+        {
+            ViewBag.Message = "Your contact page.";
+
+            return View();
         }
 
         public IActionResult NullUser()

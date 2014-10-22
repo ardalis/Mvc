@@ -8,24 +8,7 @@ namespace FormatterWebSite
 {
     public class Developer
     {
-        private string _name;
-
         [Required]
-        public string NameThatThrowsOnGet
-        {
-            get
-            {
-                if (_name == "RandomString")
-                {
-                    throw new InvalidOperationException();
-                }
-
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
-        }
+        public string Name { get; set; }
     }
 }

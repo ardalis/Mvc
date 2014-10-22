@@ -58,11 +58,11 @@ namespace Microsoft.AspNet.Mvc
             options.ModelValidatorProviders.Add(new DataMemberModelValidatorProvider());
 
             // Add types to be excluded from Validation
-            options.ExcludeFromValidationDelegates.Add(typeof(XmlNode));
             options.ExcludeFromValidationDelegates.Add(typeof(XObject));
             options.ExcludeFromValidationDelegates.Add(typeof(Type));
             options.ExcludeFromValidationDelegates.Add(typeof(byte[]));
             options.ExcludeFromValidationDelegates.Add(typeof(JToken));
+            options.ExcludeFromValidationDelegates.Add(typeName: "XmlNode");
         }
     }
 }

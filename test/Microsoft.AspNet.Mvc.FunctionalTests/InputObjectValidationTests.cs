@@ -77,16 +77,14 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             // Arrange
             var server = TestServer.Create(_services, _app);
             var client = server.CreateClient();
-            var sampleString = "RandomString";
-            var input = "{ NameThatThrowsOnGet:'" + sampleString + "'}";
-            var content = new StringContent(input, Encoding.UTF8, "application/json");
+            var content = new StringContent(string.Empty, Encoding.UTF8, "application/json");
 
             // Act
             var response = await client.PostAsync("http://localhost/Validation/GetDeveloperName", content);
 
             //Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal("Developer's get was not accessed after set.", await response.Content.ReadAsStringAsync());
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            Assert.Empty(await response.Content.ReadAsStringAsync());
         }
     }
 }

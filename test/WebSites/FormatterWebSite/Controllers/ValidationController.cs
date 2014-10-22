@@ -23,11 +23,12 @@ namespace FormatterWebSite
         }
 
         [HttpPost]
-        public string GetDeveloperName([FromBody]Developer developer)
+        public string GetDeveloperName([FromBody] Developer developer)
         {
+            // Developer is excluded in startup, hence the value should never be passed.
             if (ModelState.IsValid)
             {
-                return "Developer's get was not accessed after set.";
+                return developer?.Name;
             }
             else
             {

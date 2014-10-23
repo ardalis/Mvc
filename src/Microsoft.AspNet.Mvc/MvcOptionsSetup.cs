@@ -62,7 +62,7 @@ namespace Microsoft.AspNet.Mvc
             options.ExcludeFromValidationDelegates.Add(typeof(Type));
             options.ExcludeFromValidationDelegates.Add(typeof(byte[]));
             options.ExcludeFromValidationDelegates.Add(typeof(JToken));
-            options.ExcludeFromValidationDelegates.Add(typeName: "XmlNode");
+            options.ExcludeFromValidationDelegates.Add(typeFullName: "System.Xml.XmlNode");
         }
     }
 }

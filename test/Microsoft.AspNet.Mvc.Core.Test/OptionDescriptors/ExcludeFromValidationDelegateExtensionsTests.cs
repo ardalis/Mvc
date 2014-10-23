@@ -27,6 +27,21 @@ namespace Microsoft.AspNet.Mvc
 
         [Theory]
         [InlineData(typeof(BaseType))]
+        [InlineData(typeof(UnRelatedType))]
+        public void Insert_RegisterDerivedType_BaseAndUnrealatedTypesAreNotExcluded(Type type)
+        {
+            // Arrange
+            var collection = new List<ExcludeFromValidationDelegate>();
+
+            // Act
+            collection.Add(typeof(DerivedType));
+
+            // Assert
+            Assert.False(collection[0](type));
+        }
+
+        [Theory]
+        [InlineData(typeof(BaseType))]
         [InlineData(typeof(DerivedType))]
         public void Insert_WithTypeName_RegistersTypesAndDerivedType_ToBeExcluded(Type type)
         {
@@ -34,10 +49,25 @@ namespace Microsoft.AspNet.Mvc
             var collection = new List<ExcludeFromValidationDelegate>();
 
             // Act
-            collection.Add("BaseType");
+            collection.Add(typeof(BaseType).FullName);
 
             // Assert
             Assert.True(collection[0](type));
+        }
+
+        [Theory]
+        [InlineData(typeof(BaseType))]
+        [InlineData(typeof(UnRelatedType))]
+        public void Insert_WithTypeName_RegisterDerivedType_BaseAndUnrealatedTypesAreNotExcluded(Type type)
+        {
+            // Arrange
+            var collection = new List<ExcludeFromValidationDelegate>();
+
+            // Act
+            collection.Add(typeof(DerivedType).FullName);
+
+            // Assert
+            Assert.False(collection[0](type));
         }
 
         private class BaseType
@@ -49,6 +79,10 @@ namespace Microsoft.AspNet.Mvc
         private class DerivedType : BaseType
         {
             public int DerivedProp1 { get; set; }
+        }
+
+        private class UnRelatedType
+        {
         }
     }
 }

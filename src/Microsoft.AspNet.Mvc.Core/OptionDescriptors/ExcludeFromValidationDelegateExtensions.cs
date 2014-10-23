@@ -13,40 +13,44 @@ namespace Microsoft.AspNet.Mvc
     public static class ExcludeFromValidationDelegateExtensions
     {
         /// <summary>
-        /// Adds a delegate to the specified <paramref name="list" />
-        /// that exludes the properties of the <see cref="Type"/> specified and it's derived types from validaton.
+        /// Adds a delegate to the specified <paramref name="excludeFromValidationPredicateCollection" />
+        /// that excludes the properties of the <see cref="Type"/> specified and it's derived types from validaton.
         /// </summary>
-        /// <param name="list"><see cref="IList{T}"/> of <see cref="ExcludeFromValidationDelegate"/>.</param>
+        /// <param name="excludeFromValidationPredicateCollection">A list of <see cref="ExcludeFromValidationDelegate"/>
+        /// which are applied to filter model properties while validation.</param>
         /// <param name="type"><see cref="Type"/> which should be excluded from validation.</param>
-        public static void Add(this IList<ExcludeFromValidationDelegate> list, Type type)
+        public static void Add(this IList<ExcludeFromValidationDelegate> excludeFromValidationPredicateCollection,
+                               Type type)
         {
-            list.Add(t => type.IsAssignableFrom(t));
+            excludeFromValidationPredicateCollection.Add(t => type.IsAssignableFrom(t));
         }
 
         /// <summary>
-        /// Adds a delegate to the specified <paramref name="list" />
-        /// that exludes the properties of the type specified and it's derived types from validaton.
+        /// Adds a delegate to the specified <paramref name="excludeFromValidationPredicateCollection" />
+        /// that excludes the properties of the type specified and it's derived types from validaton.
         /// </summary>
-        /// <param name="list"><see cref="IList{T}"/> of <see cref="ExcludeFromValidationDelegate"/>.</param>
-        /// <param name="typeName">Name of the type which should be excluded from validation.</param>
-        public static void Add(this IList<ExcludeFromValidationDelegate> list, string typeName)
+        /// <param name="excludeFromValidationPredicateCollection">A list of <see cref="ExcludeFromValidationDelegate"/>
+        /// which are applied to filter model properties while validation.</param>
+        /// <param name="typeFullName">Full name of the type which should be excluded from validation.</param>
+        public static void Add(this IList<ExcludeFromValidationDelegate> excludeFromValidationPredicateCollection,
+                               string typeFullName)
         {
-            list.Add(t => CheckIfTypeNameMatches(t, typeName));
+            excludeFromValidationPredicateCollection.Add(t => CheckIfTypeNameMatches(t, typeFullName));
         }
 
-        private static bool CheckIfTypeNameMatches(Type t, string typeName)
+        private static bool CheckIfTypeNameMatches(Type t, string typeFullName)
         {
             if (t == null)
             {
                 return false;
             }
 
-            if (string.Equals(t.Name, typeName, StringComparison.Ordinal))
+            if (string.Equals(t.FullName, typeFullName, StringComparison.Ordinal))
             {
                 return true;
             }
 
-            return CheckIfTypeNameMatches(t.BaseType, typeName);
+            return CheckIfTypeNameMatches(t.BaseType, typeFullName);
         }
     }
 }

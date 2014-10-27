@@ -131,6 +131,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                 ModelName = modelName,
                 ModelState = oldBindingContext.ModelState,
                 ValueProvider = oldBindingContext.ValueProvider,
+                OriginalValueProvider = oldBindingContext.OriginalValueProvider,
                 ValidatorProvider = oldBindingContext.ValidatorProvider,
                 MetadataProvider = oldBindingContext.MetadataProvider,
                 ModelBinder = oldBindingContext.ModelBinder,
@@ -148,7 +149,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             var metadata = oldBindingContext.ModelMetadata.BinderMetadata as IValueProviderMetadata;
             if (metadata != null)
             {
-                var valueProvider = oldBindingContext.ValueProvider as IMetadataAwareValueProvider;
+                var valueProvider = oldBindingContext.OriginalValueProvider as IMetadataAwareValueProvider;
                 if (valueProvider != null)
                 {
                     newBindingContext.ValueProvider = valueProvider.Filter(metadata);

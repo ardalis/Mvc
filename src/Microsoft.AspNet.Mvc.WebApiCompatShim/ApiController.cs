@@ -12,7 +12,6 @@ using Microsoft.AspNet.Mvc.ModelBinding;
 using Microsoft.AspNet.Mvc.WebApiCompatShim;
 using Microsoft.AspNet.Routing;
 using Microsoft.Framework.DependencyInjection;
-using Microsoft.Framework.OptionsModel;
 using Newtonsoft.Json;
 using MvcMediaTypeHeaderValue = Microsoft.AspNet.Mvc.HeaderValueAbstractions.MediaTypeHeaderValue;
 
@@ -413,7 +412,7 @@ namespace System.Web.Http
         /// </param>
         public void Validate<TEntity>(TEntity entity, string keyPrefix)
         {
-            var mvcOptions = Context.RequestServices.GetRequiredService<IOptions<MvcOptions>>();
+            var bodyValidationExcludeFiltersProvider = Context.RequestServices.GetRequiredService<IBodyValidationExcludeFiltersProvider>();
             var validator = Context.RequestServices.GetRequiredService<IBodyModelValidator>();
             var metadataProvider = Context.RequestServices.GetRequiredService<IModelMetadataProvider>();
             var modelMetadata = metadataProvider.GetMetadataForType(() => entity, typeof(TEntity));
@@ -424,7 +423,7 @@ namespace System.Web.Http
                 ModelState,
                 modelMetadata,
                 containerMetadata: null,
-                excludeFromValidationDelegate: mvcOptions.Options.ExcludeFromValidationDelegates);
+                excludeFromValidationFilters: bodyValidationExcludeFiltersProvider.ExcludeFilters);
             validator.Validate(modelValidationContext, keyPrefix);
         }
 

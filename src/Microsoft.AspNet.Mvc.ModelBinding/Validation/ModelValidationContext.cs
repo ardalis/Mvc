@@ -27,7 +27,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                   modelState,
                   metadata,
                   containerMetadata,
-                  excludeFromValidationDelegate: null)
+                  excludeFromValidationFilters: null)
         {
         }
 
@@ -36,14 +36,14 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                                       [NotNull] ModelStateDictionary modelState,
                                       [NotNull] ModelMetadata metadata,
                                       ModelMetadata containerMetadata,
-                                      IReadOnlyList<ExcludeFromValidationDelegate> excludeFromValidationDelegate)
+                                      IReadOnlyList<IExcludeTypeFromBodyValidationFilter> excludeFromValidationFilters)
         {
             ModelMetadata = metadata;
             ModelState = modelState;
             MetadataProvider = metadataProvider;
             ValidatorProvider = validatorProvider;
             ContainerMetadata = containerMetadata;
-            ExcludeFromValidationDelegate = excludeFromValidationDelegate;
+            ExcludeFromValidationFilters = excludeFromValidationFilters;
         }
 
         public ModelValidationContext([NotNull] ModelValidationContext parentContext,
@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             ModelState = parentContext.ModelState;
             MetadataProvider = parentContext.MetadataProvider;
             ValidatorProvider = parentContext.ValidatorProvider;
-            ExcludeFromValidationDelegate = parentContext.ExcludeFromValidationDelegate;
+            ExcludeFromValidationFilters = parentContext.ExcludeFromValidationFilters;
         }
 
         public ModelMetadata ModelMetadata { get; private set; }
@@ -67,6 +67,6 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
 
         public IModelValidatorProvider ValidatorProvider { get; private set; }
 
-        public IReadOnlyList<ExcludeFromValidationDelegate> ExcludeFromValidationDelegate { get; private set; }
+        public IReadOnlyList<IExcludeTypeFromBodyValidationFilter> ExcludeFromValidationFilters { get; private set; }
     }
 }

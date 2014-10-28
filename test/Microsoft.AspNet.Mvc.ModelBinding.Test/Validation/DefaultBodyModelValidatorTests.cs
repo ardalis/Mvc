@@ -353,17 +353,16 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                        new DataMemberModelValidatorProvider()
                     });
             var modelMetadataProvider = new EmptyModelMetadataProvider();
-            List<ExcludeFromValidationDelegate> excludedValidationTypesPredicate =
-                new List<ExcludeFromValidationDelegate>();
+            var excludedValidationTypesPredicate =
+                new List<IExcludeTypeFromBodyValidationFilter>();
             if (excludedTypes != null)
             {
-                excludedValidationTypesPredicate = new List<ExcludeFromValidationDelegate>()
-                {
-                    (excludedType) =>
-                    {
-                        return excludedTypes.Any(t => t.IsAssignableFrom(excludedType));
-                    }
-                };
+                var mockExcludeTypeFilter = new Mock<IExcludeTypeFromBodyValidationFilter>();
+                mockExcludeTypeFilter.Setup(o => o.IsTypeExcluded(It.IsAny<Type>()))
+                                     .Returns<Type>(excludedType => 
+                                                        excludedTypes.Any(t => t.IsAssignableFrom(excludedType)));
+
+                excludedValidationTypesPredicate.Add(mockExcludeTypeFilter.Object);
             }
 
             return new ModelValidationContext(
@@ -377,7 +376,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                     modelType: type,
                     propertyName: null),
                 containerMetadata: null,
-                excludeFromValidationDelegate: excludedValidationTypesPredicate);
+                excludeFromValidationFilters: excludedValidationTypesPredicate);
         }
 
         public class Person

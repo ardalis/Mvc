@@ -29,17 +29,20 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             mockValueProvider.Setup(o => o.ContainsPrefixAsync(It.IsAny<string>()))
                              .Returns(Task.FromResult(false));
 
-            var bindingContext = new ModelBindingContext
+            var bindingContext = new MutableObjectBinderContext
             {
-                // Random type.
-                ModelMetadata = GetMetadataForType(typeof(Person)),
-                ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
-                ValueProvider = mockValueProvider.Object,
-                OriginalValueProvider = mockValueProvider.Object,
-                MetadataProvider = new DataAnnotationsModelMetadataProvider(),
+                ModelBindingContext = new ModelBindingContext
+                {
+                    // Random type.
+                    ModelMetadata = GetMetadataForType(typeof(Person)),
+                    ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
+                    ValueProvider = mockValueProvider.Object,
+                    OriginalValueProvider = mockValueProvider.Object,
+                    MetadataProvider = new DataAnnotationsModelMetadataProvider(),
 
-                // Setting it to empty ensures that model does not get created becasue of no model name.
-                ModelName = "dummyModelName",
+                    // Setting it to empty ensures that model does not get created becasue of no model name.
+                    ModelName = "dummyModelName",
+                }
             };
 
             bindingContext.ModelMetadata.ModelName = isPrefixProvided ? "prefix" : null;
@@ -64,14 +67,17 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             mockValueProvider.Setup(o => o.ContainsPrefixAsync(It.IsAny<string>()))
                              .Returns(Task.FromResult(false));
 
-            var bindingContext = new ModelBindingContext
+            var bindingContext = new MutableObjectBinderContext
             {
-                // Random type.
-                ModelMetadata = GetMetadataForType(typeof(Person)),
-                ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
-                ValueProvider = mockValueProvider.Object,
-                OriginalValueProvider = mockValueProvider.Object,
-                MetadataProvider = new DataAnnotationsModelMetadataProvider()
+                ModelBindingContext = new ModelBindingContext
+                {
+                    // Random type.
+                    ModelMetadata = GetMetadataForType(typeof(Person)),
+                    ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
+                    ValueProvider = mockValueProvider.Object,
+                    OriginalValueProvider = mockValueProvider.Object,
+                    MetadataProvider = new DataAnnotationsModelMetadataProvider()
+                }
             };
 
             bindingContext.ModelName = emptyModelName ? string.Empty : "dummyModelName";
@@ -91,16 +97,19 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             mockValueProvider.Setup(o => o.ContainsPrefixAsync(It.IsAny<string>()))
                              .Returns(Task.FromResult(false));
 
-            var bindingContext = new ModelBindingContext
+            var bindingContext = new MutableObjectBinderContext
             {
-                ModelMetadata = GetMetadataForType(typeof(BinderMetadataPocoType)),
-                ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
-                ValueProvider = mockValueProvider.Object,
-                OriginalValueProvider = mockValueProvider.Object,
-                MetadataProvider = new DataAnnotationsModelMetadataProvider(),
+                ModelBindingContext = new ModelBindingContext
+                {
+                    ModelMetadata = GetMetadataForType(typeof(BinderMetadataPocoType)),
+                    ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
+                    ValueProvider = mockValueProvider.Object,
+                    OriginalValueProvider = mockValueProvider.Object,
+                    MetadataProvider = new DataAnnotationsModelMetadataProvider(),
 
-                // Setting it to empty ensures that model does not get created becasue of no model name.
-                ModelName = "dummyModelName", 
+                    // Setting it to empty ensures that model does not get created becasue of no model name.
+                    ModelName = "dummyModelName",
+                }
             };
 
             var mutableBinder = new MutableObjectModelBinder();
@@ -127,16 +136,19 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             mockValueProvider.Setup(o => o.ContainsPrefixAsync(It.IsAny<string>()))
                              .Returns(Task.FromResult(valueProviderProvidesValue));
 
-            var bindingContext = new ModelBindingContext
+            var bindingContext = new MutableObjectBinderContext
             {
-                ModelMetadata = GetMetadataForType(modelType),
-                ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
-                ValueProvider = mockValueProvider.Object,
-                OriginalValueProvider = mockValueProvider.Object,
-                MetadataProvider = new DataAnnotationsModelMetadataProvider(),
+                ModelBindingContext = new ModelBindingContext
+                {
+                    ModelMetadata = GetMetadataForType(modelType),
+                    ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
+                    ValueProvider = mockValueProvider.Object,
+                    OriginalValueProvider = mockValueProvider.Object,
+                    MetadataProvider = new DataAnnotationsModelMetadataProvider(),
 
-                // Setting it to empty ensures that model does not get created becasue of no model name.
-                ModelName = "dummyName"
+                    // Setting it to empty ensures that model does not get created becasue of no model name.
+                    ModelName = "dummyName"
+                }
             };
 
             var mutableBinder = new MutableObjectModelBinder();
@@ -172,16 +184,19 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                                                      return null;
                                                 });
 
-            var bindingContext = new ModelBindingContext
+            var bindingContext = new MutableObjectBinderContext
             {
-                ModelMetadata = GetMetadataForType(modelType),
-                ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
-                ValueProvider = mockValueProvider.Object,
-                OriginalValueProvider = mockOriginalValueProvider.Object,
-                MetadataProvider = new DataAnnotationsModelMetadataProvider(),
+                ModelBindingContext = new ModelBindingContext
+                {
+                    ModelMetadata = GetMetadataForType(modelType),
+                    ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
+                    ValueProvider = mockValueProvider.Object,
+                    OriginalValueProvider = mockOriginalValueProvider.Object,
+                    MetadataProvider = new DataAnnotationsModelMetadataProvider(),
 
-                // Setting it to empty ensures that model does not get created becasue of no model name.
-                ModelName = "dummyName"
+                    // Setting it to empty ensures that model does not get created becasue of no model name.
+                    ModelName = "dummyName"
+                }
             };
 
             var mutableBinder = new MutableObjectModelBinder();
@@ -208,16 +223,19 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             mockOriginalValueProvider.Setup(o => o.ContainsPrefixAsync(It.IsAny<string>()))
                                      .Returns(Task.FromResult(false));
 
-            var bindingContext = new ModelBindingContext
+            var bindingContext = new MutableObjectBinderContext
             {
-                ModelMetadata = GetMetadataForType(modelType),
-                ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
-                ValueProvider = mockValueProvider.Object,
-                OriginalValueProvider = mockOriginalValueProvider.Object,
-                MetadataProvider = new DataAnnotationsModelMetadataProvider(),
+                ModelBindingContext = new ModelBindingContext
+                {
+                    ModelMetadata = GetMetadataForType(modelType),
+                    ValidatorProvider = Mock.Of<IModelValidatorProvider>(),
+                    ValueProvider = mockValueProvider.Object,
+                    OriginalValueProvider = mockOriginalValueProvider.Object,
+                    MetadataProvider = new DataAnnotationsModelMetadataProvider(),
 
-                // Setting it to empty ensures that model does not get created becasue of no model name.
-                ModelName = "dummyName"
+                    // Setting it to empty ensures that model does not get created becasue of no model name.
+                    ModelName = "dummyName"
+                }
             };
 
             var mutableBinder = new MutableObjectModelBinder();

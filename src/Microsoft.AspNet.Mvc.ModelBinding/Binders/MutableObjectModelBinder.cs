@@ -13,19 +13,23 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
 {
     public class MutableObjectModelBinder : IModelBinder
     {
-        private ModelMetadata[] _propertyMetadata = null;
-
         public virtual async Task<bool> BindModelAsync(ModelBindingContext bindingContext)
         {
-            _propertyMetadata = null;
+            var mutableObjectBinderContext = new MutableObjectBinderContext()
+            {
+                ModelBindingContext = bindingContext,
+            };
+
             ModelBindingHelper.ValidateBindingContext(bindingContext);
-            if (!CanBindType(bindingContext.ModelType) || !(await CanCreateModel(bindingContext)))
+            if (!CanBindType(bindingContext.ModelType) || !(await CanCreateModel(mutableObjectBinderContext)))
             {
                 return false;
             }
 
             EnsureModel(bindingContext);
-            var propertyMetadatas = _propertyMetadata ?? GetMetadataForProperties(bindingContext).ToArray();
+            var propertyMetadatas = mutableObjectBinderContext.PropertyMetadata ?? 
+                                        GetMetadataForProperties(bindingContext).ToArray();
+
             var dto = CreateAndPopulateDto(bindingContext, propertyMetadatas);
 
             // post-processing, e.g. property setters and hooking up validation
@@ -40,9 +44,9 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             return CanUpdatePropertyInternal(propertyMetadata);
         }
 
-        internal async Task<bool> CanCreateModel(ModelBindingContext bindingContext)
+        internal async Task<bool> CanCreateModel(MutableObjectBinderContext context)
         {
-
+            var bindingContext = context.ModelBindingContext;
             var topLevelObject = bindingContext.ModelMetadata.ContainerType == null;
             var isThereAnExplicitAlias = bindingContext.ModelMetadata.ModelName != null;
 
@@ -51,25 +55,37 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             // Create the object if : 
             // 1. It is a top level model with an explicit user supplied prefix. 
             //    In this case since it will never fallback to empty prefix, we need to create the model here.
+            if (topLevelObject && isThereAnExplicitAlias)
+            {
+                return true;
+            }
+
             // 2. It is a top level object and there is no model name ( Fallback to empty prefix case ). 
             //    This is necessary as we do not want to depend on a value provider to contain an empty prefix.
+            if (topLevelObject && bindingContext.ModelName == string.Empty)
+            {
+                return true;
+            }
+
             // 3. The model name is not prefixed and a value provider can directly provide a value for the model name.
             //    The fact that it is not prefixed means that the containsPrefixAsync call checks for the exact model name
             //    instead of doing a prefix match.
-            // 4. Any of the model properties can be bound using a value provider.
-            if (topLevelObject && isThereAnExplicitAlias ||
-                topLevelObject && bindingContext.ModelName == string.Empty ||
-                !bindingContext.ModelName.Contains(".") && await bindingContext.ValueProvider.ContainsPrefixAsync(bindingContext.ModelName) ||
-                await CanValueBindAnyModelProperties(bindingContext))
+            if (!bindingContext.ModelName.Contains(".") && 
+                await bindingContext.ValueProvider.ContainsPrefixAsync(bindingContext.ModelName))
             {
-                // need to dive deep. 
+                return true;
+            }
+
+            // 4. Any of the model properties can be bound using a value provider.
+            if (await CanValueBindAnyModelProperties(context))
+            {
                 return true;
             }
 
             return false;
         }
 
-        private async Task<bool> CanValueBindAnyModelProperties(ModelBindingContext bindingContext)
+        private async Task<bool> CanValueBindAnyModelProperties(MutableObjectBinderContext context)
         {
             // We need to enumerate the non marked properties and properties marked with IValueProviderMetadata
             // instead of checking bindingContext.ValueProvider.ContainsPrefixAsync(bindingContext.ModelName) 
@@ -77,10 +93,10 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             // where a value provider might be willing to provide a marked property, which might never be bound.
             // For example if person.Name is marked with FromQuery, and FormValueProvider has a key person.Name, and the
             // QueryValueProvider does not, we do not want to create Person.
-            _propertyMetadata = GetMetadataForProperties(bindingContext).ToArray();
+            context.PropertyMetadata = GetMetadataForProperties(context.ModelBindingContext).ToArray();
 
             bool isAnyPropertyEnabledForValueProviderBasedBinding = false;
-            foreach (var propertyMetadata in _propertyMetadata)
+            foreach (var propertyMetadata in context.PropertyMetadata)
             {
                 // This check will skip properties which are marked explicitly using a non value binder.
                 if (propertyMetadata.BinderMetadata == null ||
@@ -89,7 +105,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                     isAnyPropertyEnabledForValueProviderBasedBinding = true;
 
                     // If any property can return a true value.
-                    if (await CanBindValue(bindingContext, propertyMetadata))
+                    if (await CanBindValue(context.ModelBindingContext, propertyMetadata))
                     {
                         return true;
                     }
@@ -113,10 +129,10 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             if (valueProviderMetadata != null)
             {
                 // if there is a binder metadata and since the property can be bound using a value provider.
-                var metadataAwareVp = bindingContext.OriginalValueProvider as IMetadataAwareValueProvider;
-                if(metadataAwareVp != null)
+                var metadataAwareValueProvider = bindingContext.OriginalValueProvider as IMetadataAwareValueProvider;
+                if(metadataAwareValueProvider != null)
                 {
-                    valueProvider = metadataAwareVp.Filter(valueProviderMetadata);
+                    valueProvider = metadataAwareValueProvider.Filter(valueProviderMetadata);
                 }
             }
 

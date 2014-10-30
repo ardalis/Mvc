@@ -149,6 +149,12 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             var metadata = oldBindingContext.ModelMetadata.BinderMetadata as IValueProviderMetadata;
             if (metadata != null)
             {
+                // ValueProvider property might contain a filtered list of value providers. 
+                // While deciding to bind a particular property which is annotated with a IValueProviderMetadata,
+                // instead of refiltering an already filtered list, we need to filter value providers from a global list 
+                // of all value providers. This is so that every artificat that is explicitly marked using an
+                // IValueProviderMetadata can restrict model binding to only use value providers which support this 
+                // IValueProviderMetadata.
                 var valueProvider = oldBindingContext.OriginalValueProvider as IMetadataAwareValueProvider;
                 if (valueProvider != null)
                 {

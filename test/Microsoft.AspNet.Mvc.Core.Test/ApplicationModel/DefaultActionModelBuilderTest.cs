@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(DerivedController).GetTypeInfo());
 
             // Assert
             Assert.Equal(expected, isValid);
@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(BaseController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(DerivedController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.True(method.IsSpecialName);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(OperatorOverloadingController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(DerivedController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
@@ -101,7 +101,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(DerivedController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
@@ -122,10 +122,110 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(DerivedController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
+        }
+
+        [Fact]
+        public void IsAction_DerivedControllerIDisposableDisposeMethod()
+        {
+            // Arrange
+            var builder = new AccessibleActionModelBuilder();
+            var typeInfo = typeof(DerivedController).GetTypeInfo();
+            var methodInfo =
+                typeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0];
+            var method = typeInfo.GetMethods().Where(m => (m == methodInfo)).SingleOrDefault();
+            Assert.NotNull(method);
+
+            // Act
+            var isValid = builder.IsAction(method, typeInfo);
+
+            // Assert
+            Assert.False(isValid);
+        }
+
+        [Fact]
+        public void IsAction_DerivedControllerDisposeMethod()
+        {
+            // Arrange
+            var builder = new AccessibleActionModelBuilder();
+            var typeInfo = typeof(DerivedController).GetTypeInfo();
+            var methodInfo =
+                typeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0];
+            var methods = typeInfo.GetMethods().Where(m => m.Name.Equals("Dispose") && m != methodInfo);
+
+            Assert.NotNull(methods);
+
+            foreach (var method in methods)
+            {
+                // Act
+                var isValid = builder.IsAction(method, typeInfo);
+
+                // Assert
+                Assert.True(isValid);
+            }
+        }
+
+        [Fact]
+        public void IsAction_PocoControllerIDisposableDisposeMethod()
+        {
+            // Arrange
+            var builder = new AccessibleActionModelBuilder();
+            var typeInfo = typeof(IDisposablePocoController).GetTypeInfo();
+            var methodInfo =
+                typeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0];
+            var method = typeInfo.GetMethods().Where(m => (m == methodInfo)).SingleOrDefault();
+            Assert.NotNull(method);
+
+            // Act
+            var isValid = builder.IsAction(method, typeInfo);
+
+            // Assert
+            Assert.False(isValid);
+        }
+
+        [Fact]
+        public void IsAction_PocoControllerDisposeMethod()
+        {
+            // Arrange
+            var builder = new AccessibleActionModelBuilder();
+            var typeInfo = typeof(IDisposablePocoController).GetTypeInfo();
+            var methodInfo =
+                typeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0];
+            var methods = typeInfo.GetMethods().Where(m => m.Name.Equals("Dispose") && m != methodInfo);
+
+            Assert.NotNull(methods);
+
+            foreach (var method in methods)
+            {
+                // Act
+                var isValid = builder.IsAction(method, typeInfo);
+
+                // Assert
+                Assert.True(isValid);
+            }
+        }
+
+        [Fact]
+        public void IsAction_SimplePocoControllerDisposeMethod()
+        {
+            // Arrange
+            var builder = new AccessibleActionModelBuilder();
+            var typeInfo = typeof(SimplePocoController).GetTypeInfo();
+            var methods = typeInfo.GetMethods().Where(m => m.Name.Equals("Dispose"));
+
+            Assert.NotNull(methods);
+
+            foreach (var method in methods)
+            {
+                // Act
+                var isValid = builder.IsAction(method, typeInfo);
+
+                // Assert
+                Assert.True(isValid);
+            }
         }
 
         [Theory]
@@ -142,7 +242,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             Assert.NotNull(method);
 
             // Act
-            var isValid = builder.IsAction(method);
+            var isValid = builder.IsAction(method, typeof(DerivedController).GetTypeInfo());
 
             // Assert
             Assert.False(isValid);
@@ -157,7 +257,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(ConventionallyRoutedController.Edit);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -177,7 +277,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(ConventionallyRoutedController.Update);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -199,7 +299,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(ConventionallyRoutedController.Delete);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -222,7 +322,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(ConventionallyRoutedController.Details);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -242,7 +342,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(ConventionallyRoutedController.List);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -263,7 +363,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(NoRouteAttributeOnControllerController.Edit);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -289,7 +389,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(NoRouteAttributeOnControllerController.Update);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -314,7 +414,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(NoRouteAttributeOnControllerController.List);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -339,7 +439,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(NoRouteAttributeOnControllerController.Index);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             Assert.Equal(2, actions.Count());
@@ -372,7 +472,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var actionName = nameof(NoRouteAttributeOnControllerController.Remove);
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod(actionName), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -397,7 +497,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var typeInfo = controller.GetTypeInfo();
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod("Delete"));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod("Delete"), typeInfo);
 
             // Assert
             var action = Assert.Single(actions);
@@ -422,7 +522,7 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             var typeInfo = controller.GetTypeInfo();
 
             // Act
-            var actions = builder.BuildActionModels(typeInfo.GetMethod("Index"));
+            var actions = builder.BuildActionModels(typeInfo.GetMethod("Index"), typeInfo);
 
             // Assert
             Assert.Equal(2, actions.Count());
@@ -446,9 +546,9 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
 
         private class AccessibleActionModelBuilder : DefaultActionModelBuilder
         {
-            public new bool IsAction([NotNull]MethodInfo methodInfo)
+            public new bool IsAction([NotNull]MethodInfo methodInfo, [NotNull] TypeInfo typeInfo)
             {
-                return base.IsAction(methodInfo);
+                return base.IsAction(methodInfo, typeInfo);
             }
         }
 
@@ -506,6 +606,49 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
             }
 
             private static void PrivateStaticMethod()
+            {
+            }
+
+            public string Dispose(string s)
+            {
+                return s;
+            }
+
+            public new void Dispose()
+            {
+            }
+        }
+
+        private class IDisposablePocoController : IDisposable
+        {
+            public string Index()
+            {
+                return "Hello world";
+            }
+
+            public void Dispose()
+            {
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+            }
+        }
+
+        private class SimplePocoController
+        {
+            public string Index()
+            {
+                return "Hello world";
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public void Dispose(string s)
             {
             }
         }

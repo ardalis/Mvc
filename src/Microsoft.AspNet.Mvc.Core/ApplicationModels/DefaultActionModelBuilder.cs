@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Open Technologies, Inc. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -16,9 +17,9 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
     public class DefaultActionModelBuilder : IActionModelBuilder
     {
         /// <inheritdoc />
-        public IEnumerable<ActionModel> BuildActionModels([NotNull] MethodInfo methodInfo)
+        public IEnumerable<ActionModel> BuildActionModels([NotNull] MethodInfo methodInfo, [NotNull] TypeInfo typeInfo)
         {
-            if (!IsAction(methodInfo))
+            if (!IsAction(methodInfo, typeInfo))
             {
                 return Enumerable.Empty<ActionModel>();
             }
@@ -131,11 +132,12 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
         /// Returns <c>true</c> if the <paramref name="methodInfo"/> is an action. Otherwise <c>false</c>.
         /// </summary>
         /// <param name="methodInfo">The <see cref="MethodInfo"/>.</param>
+        /// <param name="typeInfo">The <see cref="TypeInfo"/>.</param>
         /// <returns><c>true</c> if the <paramref name="methodInfo"/> is an action. Otherwise <c>false</c>.</returns>
         /// <remarks>
         /// Override this method to provide custom logic to determine which methods are considered actions.
         /// </remarks>
-        protected virtual bool IsAction([NotNull] MethodInfo methodInfo)
+        protected virtual bool IsAction([NotNull] MethodInfo methodInfo, [NotNull] TypeInfo typeInfo)
         {
             return
                 methodInfo.IsPublic &&
@@ -150,10 +152,20 @@ namespace Microsoft.AspNet.Mvc.ApplicationModels
                 !methodInfo.IsDefined(typeof(NonActionAttribute)) &&
 
                 // Overriden methods from Object class, e.g. Equals(Object), GetHashCode(), etc., are not valid.
-                methodInfo.GetBaseDefinition().DeclaringType != typeof(object);
+                methodInfo.GetBaseDefinition().DeclaringType != typeof(object) &&
+                // Dispose method implemented from IDisposable is not valid
+                !isDisposeMethodIDisposable(methodInfo, typeInfo);
         }
 
-        /// <summary>
+        private bool isDisposeMethodIDisposable(MethodInfo methodInfo, TypeInfo typeInfo)
+        {
+            return
+                (typeof(IDisposable).GetTypeInfo().IsAssignableFrom(typeInfo) &&
+                typeInfo.GetRuntimeInterfaceMap(typeof(IDisposable)).TargetMethods[0] == methodInfo);
+        }
+
+
+        /// <suethodandlemary>
         /// Creates an <see cref="ActionModel"/> for the given <see cref="MethodInfo"/>.
         /// </summary>
         /// <param name="methodInfo">The <see cref="MethodInfo"/>.</param>

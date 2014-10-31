@@ -32,17 +32,15 @@ namespace Microsoft.AspNet.Mvc
 
         public async Task RouteAsync([NotNull] RouteContext context)
         {
+            // TODO: Throw an error here that's descriptive enough so that
+            // users understand they should call the per request scoped middleware
+            // or set HttpContext.Services manually
             var services = context.HttpContext.RequestServices;
+            Contract.Assert(services != null);
 
             // Verify if AddMvc was done before calling UseMvc
             // We use the MvcMarkerService to make sure if all the services were added.
             MvcServicesHelper.ThrowIfMvcNotRegistered(services);
-
-            Contract.Assert(services != null);
-
-            // TODO: Throw an error here that's descriptive enough so that
-            // users understand they should call the per request scoped middleware
-            // or set HttpContext.Services manually
 
             EnsureLogger(context.HttpContext);
             using (_logger.BeginScope("MvcRouteHandler.RouteAsync"))
@@ -65,63 +63,88 @@ namespace Microsoft.AspNet.Mvc
                     return;
                 }
 
+                // Replacing the route data allows any code running here to dirty the route values or data-tokens
+                // without affecting something upstream.
+                var oldRouteData = context.RouteData;
+                var newRouteData = new RouteData(oldRouteData);
+
                 if (actionDescriptor.RouteValueDefaults != null)
                 {
                     foreach (var kvp in actionDescriptor.RouteValueDefaults)
                     {
-                        if (!context.RouteData.Values.ContainsKey(kvp.Key))
+                        if (!newRouteData.Values.ContainsKey(kvp.Key))
                         {
-                            context.RouteData.Values.Add(kvp.Key, kvp.Value);
+                            newRouteData.Values.Add(kvp.Key, kvp.Value);
                         }
                     }
                 }
 
-                var actionContext = new ActionContext(context.HttpContext, context.RouteData, actionDescriptor);
-
-                var optionsAccessor = services.GetRequiredService<IOptions<MvcOptions>>();
-                actionContext.ModelState.MaxAllowedErrors = optionsAccessor.Options.MaxModelValidationErrors;
-
-                var contextAccessor = services.GetRequiredService<IContextAccessor<ActionContext>>();
-                using (contextAccessor.SetContextSource(() => actionContext, PreventExchange))
+                try
                 {
-                    var invokerFactory = services.GetRequiredService<IActionInvokerFactory>();
-                    var invoker = invokerFactory.CreateInvoker(actionContext);
-                    if (invoker == null)
-                    {
-                        var ex = new InvalidOperationException(
-                            Resources.FormatActionInvokerFactory_CouldNotCreateInvoker(
-                                actionDescriptor.DisplayName));
+                    context.RouteData = newRouteData;
 
-                        // Add tracing/logging (what do we think of this pattern of 
-                        // tacking on extra data on the exception?)
-                        ex.Data.Add("AD", actionDescriptor);
-
-                        if (_logger.IsEnabled(TraceType.Verbose))
-                        {
-                            _logger.WriteValues(new MvcRouteHandlerRouteAsyncValues()
-                            {
-                                ActionSelected = true,
-                                ActionInvoked = false,
-                                Handled = context.IsHandled
-                            });
-                        }
-
-                        throw ex;
-                    }
-
-                    await invoker.InvokeAsync();
+                    await InvokeActionAsync(context, actionDescriptor);
                     context.IsHandled = true;
+                }
+                finally
+                {
+                    if (!context.IsHandled)
+                    {
+                        context.RouteData = oldRouteData;
+                    }
+                }
+
+                if (_logger.IsEnabled(TraceType.Verbose))
+                {
+                    _logger.WriteValues(new MvcRouteHandlerRouteAsyncValues()
+                    {
+                        ActionSelected = true,
+                        ActionInvoked = true,
+                        Handled = context.IsHandled
+                    });
+                }
+            }
+        }
+
+        private async Task InvokeActionAsync(RouteContext context, ActionDescriptor actionDescriptor)
+        {
+            var services = context.HttpContext.RequestServices;
+            Contract.Assert(services != null);
+
+            var actionContext = new ActionContext(context.HttpContext, context.RouteData, actionDescriptor);
+
+            var optionsAccessor = services.GetRequiredService<IOptions<MvcOptions>>();
+            actionContext.ModelState.MaxAllowedErrors = optionsAccessor.Options.MaxModelValidationErrors;
+
+            var contextAccessor = services.GetRequiredService<IContextAccessor<ActionContext>>();
+            using (contextAccessor.SetContextSource(() => actionContext, PreventExchange))
+            {
+                var invokerFactory = services.GetRequiredService<IActionInvokerFactory>();
+                var invoker = invokerFactory.CreateInvoker(actionContext);
+                if (invoker == null)
+                {
+                    var ex = new InvalidOperationException(
+                        Resources.FormatActionInvokerFactory_CouldNotCreateInvoker(
+                            actionDescriptor.DisplayName));
+
+                    // Add tracing/logging (what do we think of this pattern of 
+                    // tacking on extra data on the exception?)
+                    ex.Data.Add("AD", actionDescriptor);
 
                     if (_logger.IsEnabled(TraceType.Verbose))
                     {
                         _logger.WriteValues(new MvcRouteHandlerRouteAsyncValues()
                         {
                             ActionSelected = true,
-                            ActionInvoked = true,
+                            ActionInvoked = false,
                             Handled = context.IsHandled
                         });
                     }
+
+                    throw ex;
                 }
+
+                await invoker.InvokeAsync();
             }
         }
 

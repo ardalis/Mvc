@@ -67,8 +67,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
 
             // Only perform validation at the root of the object graph. ValidationNode will recursively walk the graph.
             // Ignore ComplexModelDto since it essentially wraps the primary object.
-            if (IsBindingAtRootOfObjectGraph(newBindingContext) && 
-                !(bindingContext.ModelMetadata.BinderMetadata is IFormatterBinderMetadata))
+            if (IsBindingAtRootOfObjectGraph(newBindingContext))
             {
                 // run validation and return the model
                 // If we fell back to an empty prefix above and are dealing with simple types,

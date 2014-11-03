@@ -23,8 +23,8 @@ namespace Microsoft.AspNet.Mvc
         public static void Add(this IList<ExcludeValidationDescriptor> excludeBodyValidationDescriptorCollection,
                                Type type)
         {
-            var genericType = typeof(DefaultTypeBasedExcludeFilter<>).MakeGenericType(type);
-            excludeBodyValidationDescriptorCollection.Add(new ExcludeValidationDescriptor(genericType));
+            var typeBasedExcludeFilter = new DefaultTypeBasedExcludeFilter(type);
+            excludeBodyValidationDescriptorCollection.Add(new ExcludeValidationDescriptor(typeBasedExcludeFilter));
         }
 
         /// <summary>

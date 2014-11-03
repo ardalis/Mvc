@@ -8,14 +8,28 @@ namespace Microsoft.AspNet.Mvc
 {
     /// <summary>
     /// Provides an implementation of <see cref="IExcludeTypeValidationFilter"/> which can filter 
-    /// based on <see cref="T"/> parameter.
+    /// based on a type.
     /// </summary>
-    /// <typeparam name="T">Represents a type that needs to be filtered.</typeparam>
-    public class DefaultTypeBasedExcludeFilter<T> : IExcludeTypeValidationFilter
+    public class DefaultTypeBasedExcludeFilter : IExcludeTypeValidationFilter
     {
+        /// <summary>
+        /// Creates a new instance of <see cref="DefaultTypeBasedExcludeFilter"/>.
+        /// </summary>
+        /// <param name="type">The type which needs to be excluded.</param>
+        public DefaultTypeBasedExcludeFilter([NotNull] Type type)
+        {
+            ExcludedType = type;
+        }
+
+        /// <summary>
+        /// Gets the type which is excluded from validation.
+        /// </summary>
+        public Type ExcludedType { get; private set; }
+
+        /// <inheritdoc />
         public bool IsTypeExcluded([NotNull] Type propertyType)
         {
-            return typeof(T).IsAssignableFrom(propertyType);
+            return ExcludedType.IsAssignableFrom(propertyType);
         }    
     }
 }

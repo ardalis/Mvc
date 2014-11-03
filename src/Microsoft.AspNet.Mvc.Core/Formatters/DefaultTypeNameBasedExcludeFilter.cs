@@ -8,35 +8,42 @@ namespace Microsoft.AspNet.Mvc
 {
     /// <summary>
     /// Provides an implementation of <see cref="IExcludeTypeValidationFilter"/> which can filter 
-    /// based on type full name.
+    /// based on a type full name.
     /// </summary>
     public class DefaultTypeNameBasedExcludeFilter : IExcludeTypeValidationFilter
     {
-        private readonly string _registeredTypeFullName;
-
+        /// <summary>
+        /// Creates a new instance of <see cref="DefaultTypeNameBasedExcludeFilter"/>
+        /// </summary>
+        /// <param name="typeFullName">Fully qualified name of the type which needs to be excluded.</param>
         public DefaultTypeNameBasedExcludeFilter([NotNull] string typeFullName)
         {
-            _registeredTypeFullName = typeFullName;
+            ExcludedTypeName = typeFullName;
         }
+
+        /// <summary>
+        /// Gets the type full name which is excluded from validation.
+        /// </summary>
+        public string ExcludedTypeName { get; private set; }
 
         public bool IsTypeExcluded([NotNull] Type propertyType)
         {
             return CheckIfTypeNameMatches(propertyType);
         }
 
-        private bool CheckIfTypeNameMatches(Type t)
+        private bool CheckIfTypeNameMatches(Type type)
         {
-            if (t == null)
+            if (type == null)
             {
                 return false;
             }
 
-            if (string.Equals(t.FullName, _registeredTypeFullName, StringComparison.Ordinal))
+            if (string.Equals(type.FullName, ExcludedTypeName, StringComparison.Ordinal))
             {
                 return true;
             }
 
-            return CheckIfTypeNameMatches(t.BaseType());
+            return CheckIfTypeNameMatches(type.BaseType());
         }
     }
 }

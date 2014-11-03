@@ -22,7 +22,7 @@ namespace FormatterWebSite
 
                 services.Configure<MvcOptions>(options =>
                 {
-                    options.BodyValidationExcludeFilters.Add(typeof(Developer));
+                    options.ValidationExcludeFilters.Add(typeof(Developer));
                 });
             });
 

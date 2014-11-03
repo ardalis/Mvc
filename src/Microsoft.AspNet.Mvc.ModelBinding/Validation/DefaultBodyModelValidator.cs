@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
         }
 
         private bool IsTypeExcludedFromValidation(
-            IReadOnlyList<IExcludeTypeFromBodyValidationFilter> filters, Type type)
+            IReadOnlyList<IExcludeTypeValidationFilter> filters, Type type)
         {
             // This can be set to null in ModelBinding scenarios which does not flow through this path.
             if (filters == null)

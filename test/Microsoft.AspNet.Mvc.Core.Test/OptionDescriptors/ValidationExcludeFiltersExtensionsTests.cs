@@ -7,14 +7,14 @@ using Xunit;
 
 namespace Microsoft.AspNet.Mvc
 {
-    public class BodyValidationExcludeFiltersExtensionsTests
+    public class ValidationExcludeFiltersExtensionsTests
     {
         [Fact]
         public void InputFormatterDescriptors_AddsTypesAndTypeNames()
         {
             // Arrange
             var type1 = typeof(BaseType);
-            var collection = new List<ExcludeBodyValidationDescriptor>();
+            var collection = new List<ExcludeValidationDescriptor>();
 
             // Act
             collection.Add(type1);

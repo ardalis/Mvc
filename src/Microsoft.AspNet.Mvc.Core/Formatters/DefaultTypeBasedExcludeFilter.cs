@@ -7,11 +7,11 @@ using Microsoft.AspNet.Mvc.ModelBinding;
 namespace Microsoft.AspNet.Mvc
 {
     /// <summary>
-    /// Provides an implementation of <see cref="IExcludeTypeFromBodyValidationFilter"/> which can filter 
+    /// Provides an implementation of <see cref="IExcludeTypeValidationFilter"/> which can filter 
     /// based on <see cref="T"/> parameter.
     /// </summary>
     /// <typeparam name="T">Represents a type that needs to be filtered.</typeparam>
-    public class DefaultTypeBasedExcludeFilter<T> : IExcludeTypeFromBodyValidationFilter
+    public class DefaultTypeBasedExcludeFilter<T> : IExcludeTypeValidationFilter
     {
         public bool IsTypeExcluded([NotNull] Type propertyType)
         {

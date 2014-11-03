@@ -17,12 +17,12 @@ namespace Microsoft.AspNet.Mvc
         private readonly ActionContext _actionContext;
         private readonly IInputFormatterSelector _formatterSelector;
         private readonly IBodyModelValidator _bodyModelValidator;
-        private readonly IBodyValidationExcludeFiltersProvider _bodyValidationExcludeFiltersProvider;
+        private readonly IValidationExcludeFiltersProvider _bodyValidationExcludeFiltersProvider;
 
         public BodyModelBinder([NotNull] IContextAccessor<ActionContext> context,
                                [NotNull] IInputFormatterSelector selector,
                                [NotNull] IBodyModelValidator bodyModelValidator,
-                               [NotNull] IBodyValidationExcludeFiltersProvider bodyValidationExcludeFiltersProvider)
+                               [NotNull] IValidationExcludeFiltersProvider bodyValidationExcludeFiltersProvider)
         {
             _actionContext = context.Value;
             _formatterSelector = selector;

@@ -129,14 +129,14 @@ namespace Microsoft.AspNet.Mvc
             setup.Configure(mvcOptions);
 
             // Assert
-            Assert.Equal(5, mvcOptions.BodyValidationExcludeFilters.Count);
+            Assert.Equal(5, mvcOptions.ValidationExcludeFilters.Count);
 
             // Verify if the delegates registered by default exclude the given types. 
-            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<XObject>), mvcOptions.BodyValidationExcludeFilters[0].OptionType);
-            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<Type>), mvcOptions.BodyValidationExcludeFilters[1].OptionType);
-            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<byte[]>), mvcOptions.BodyValidationExcludeFilters[2].OptionType);
-            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<JToken>), mvcOptions.BodyValidationExcludeFilters[3].OptionType);
-            Assert.Equal(typeof(DefaultTypeNameBasedExcludeFilter), mvcOptions.BodyValidationExcludeFilters[4].OptionType);
+            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<XObject>), mvcOptions.ValidationExcludeFilters[0].OptionType);
+            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<Type>), mvcOptions.ValidationExcludeFilters[1].OptionType);
+            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<byte[]>), mvcOptions.ValidationExcludeFilters[2].OptionType);
+            Assert.Equal(typeof(DefaultTypeBasedExcludeFilter<JToken>), mvcOptions.ValidationExcludeFilters[3].OptionType);
+            Assert.Equal(typeof(DefaultTypeNameBasedExcludeFilter), mvcOptions.ValidationExcludeFilters[4].OptionType);
         }
     }
 }

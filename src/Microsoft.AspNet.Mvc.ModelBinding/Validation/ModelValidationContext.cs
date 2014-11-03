@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                                       [NotNull] ModelStateDictionary modelState,
                                       [NotNull] ModelMetadata metadata,
                                       ModelMetadata containerMetadata,
-                                      IReadOnlyList<IExcludeTypeFromBodyValidationFilter> excludeFromValidationFilters)
+                                      IReadOnlyList<IExcludeTypeValidationFilter> excludeFromValidationFilters)
         {
             ModelMetadata = metadata;
             ModelState = modelState;
@@ -67,6 +67,6 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
 
         public IModelValidatorProvider ValidatorProvider { get; private set; }
 
-        public IReadOnlyList<IExcludeTypeFromBodyValidationFilter> ExcludeFromValidationFilters { get; private set; }
+        public IReadOnlyList<IExcludeTypeValidationFilter> ExcludeFromValidationFilters { get; private set; }
     }
 }

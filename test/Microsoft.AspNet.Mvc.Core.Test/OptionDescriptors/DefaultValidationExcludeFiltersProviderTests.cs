@@ -9,7 +9,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.Mvc.OptionDescriptors
 {
-    public class DefaultBodyValidationExcludeFiltersProviderTests
+    public class DefaultValidationExcludeFiltersProviderTests
     {
         [Theory]
         [InlineData(typeof(BaseType))]
@@ -18,13 +18,13 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         {
             // Arrange
             var options = new MvcOptions();
-            options.BodyValidationExcludeFilters.Add(type);
+            options.ValidationExcludeFilters.Add(type);
             var optionsAccessor = new Mock<IOptions<MvcOptions>>();
             optionsAccessor.SetupGet(o => o.Options)
                            .Returns(options);
             var activator = new TypeActivator();
             var serviceProvider = new Mock<IServiceProvider>();
-            var provider = new DefaultBodyValidationExcludeFiltersProvider(optionsAccessor.Object,
+            var provider = new DefaultValidationExcludeFiltersProvider(optionsAccessor.Object,
                                                                            activator,
                                                                            serviceProvider.Object);
 
@@ -43,13 +43,13 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         {
             // Arrange
             var options = new MvcOptions();
-            options.BodyValidationExcludeFilters.Add(typeof(DerivedType));
+            options.ValidationExcludeFilters.Add(typeof(DerivedType));
             var optionsAccessor = new Mock<IOptions<MvcOptions>>();
             optionsAccessor.SetupGet(o => o.Options)
                            .Returns(options);
             var activator = new TypeActivator();
             var serviceProvider = new Mock<IServiceProvider>();
-            var provider = new DefaultBodyValidationExcludeFiltersProvider(optionsAccessor.Object,
+            var provider = new DefaultValidationExcludeFiltersProvider(optionsAccessor.Object,
                                                                            activator,
                                                                            serviceProvider.Object);
 
@@ -68,13 +68,13 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         {
             // Arrange
             var options = new MvcOptions();
-            options.BodyValidationExcludeFilters.Add(type.FullName);
+            options.ValidationExcludeFilters.Add(type.FullName);
             var optionsAccessor = new Mock<IOptions<MvcOptions>>();
             optionsAccessor.SetupGet(o => o.Options)
                            .Returns(options);
             var activator = new TypeActivator();
             var serviceProvider = new Mock<IServiceProvider>();
-            var provider = new DefaultBodyValidationExcludeFiltersProvider(optionsAccessor.Object,
+            var provider = new DefaultValidationExcludeFiltersProvider(optionsAccessor.Object,
                                                                            activator,
                                                                            serviceProvider.Object);
 
@@ -93,13 +93,13 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         {
             // Arrange
             var options = new MvcOptions();
-            options.BodyValidationExcludeFilters.Add(typeof(DerivedType).FullName);
+            options.ValidationExcludeFilters.Add(typeof(DerivedType).FullName);
             var optionsAccessor = new Mock<IOptions<MvcOptions>>();
             optionsAccessor.SetupGet(o => o.Options)
                            .Returns(options);
             var activator = new TypeActivator();
             var serviceProvider = new Mock<IServiceProvider>();
-            var provider = new DefaultBodyValidationExcludeFiltersProvider(optionsAccessor.Object,
+            var provider = new DefaultValidationExcludeFiltersProvider(optionsAccessor.Object,
                                                                            activator,
                                                                            serviceProvider.Object);
 

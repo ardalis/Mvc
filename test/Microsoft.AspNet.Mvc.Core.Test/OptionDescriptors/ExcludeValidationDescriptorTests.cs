@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.Mvc.OptionDescriptors
 {
-    public class ExcludeBodyValidationDescriptorTests
+    public class ExcludeValidationDescriptorTests
     {
         [Fact]
         public void ConstructorThrows_IfTypeIsNotIExcludeTypeFromBodyValidation()
@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
             var type = typeof(string);
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgument(() => new ExcludeBodyValidationDescriptor(type), "type", expected);
+            ExceptionAssert.ThrowsArgument(() => new ExcludeValidationDescriptor(type), "type", expected);
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
             var type = typeof(TestExcludeFilter);
 
             // Act
-            var descriptor = new ExcludeBodyValidationDescriptor(type);
+            var descriptor = new ExcludeValidationDescriptor(type);
 
             // Assert
             Assert.Equal(type, descriptor.OptionType);
@@ -43,14 +43,14 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
             var instance = new TestExcludeFilter();
 
             // Act
-            var descriptor = new ExcludeBodyValidationDescriptor(instance);
+            var descriptor = new ExcludeValidationDescriptor(instance);
 
             // Assert
             Assert.Same(instance, descriptor.Instance);
             Assert.Equal(instance.GetType(), descriptor.OptionType);
         }
 
-        private class TestExcludeFilter : IExcludeTypeFromBodyValidationFilter
+        private class TestExcludeFilter : IExcludeTypeValidationFilter
         {
             public bool IsTypeExcluded([NotNull] Type propertyType)
             {

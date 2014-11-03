@@ -8,38 +8,38 @@ using Microsoft.AspNet.Mvc.OptionDescriptors;
 namespace Microsoft.AspNet.Mvc
 {
     /// <summary>
-    /// Extensions for <see cref="MvcOptions.BodyValidationExcludeFilters"/>.
+    /// Extensions for <see cref="MvcOptions.ValidationExcludeFilters"/>.
     /// </summary>
-    public static class BodyValidationExcludeFiltersExtensions
+    public static class ValidationExcludeFiltersExtensions
     {
         /// <summary>
         /// Adds a descriptor to the specified <paramref name="excludeBodyValidationDescriptorCollection" />
         /// that excludes the properties of the <see cref="Type"/> specified and it's derived types from validaton.
         /// </summary>
-        /// <param name="excludeBodyValidationDescriptorCollection">A list of <see cref="ExcludeBodyValidationDescriptor"/>
+        /// <param name="excludeBodyValidationDescriptorCollection">A list of <see cref="ExcludeValidationDescriptor"/>
         /// which are used to get a collection of exclude filters to be applied for filtering model properties during validation.
         /// </param>
         /// <param name="type"><see cref="Type"/> which should be excluded from validation.</param>
-        public static void Add(this IList<ExcludeBodyValidationDescriptor> excludeBodyValidationDescriptorCollection,
+        public static void Add(this IList<ExcludeValidationDescriptor> excludeBodyValidationDescriptorCollection,
                                Type type)
         {
             var genericType = typeof(DefaultTypeBasedExcludeFilter<>).MakeGenericType(type);
-            excludeBodyValidationDescriptorCollection.Add(new ExcludeBodyValidationDescriptor(genericType));
+            excludeBodyValidationDescriptorCollection.Add(new ExcludeValidationDescriptor(genericType));
         }
 
         /// <summary>
         /// Adds a descriptor to the specified <paramref name="excludeBodyValidationDescriptorCollection" />
         /// that excludes the properties of the type specified and it's derived types from validaton.
         /// </summary>
-        /// <param name="excludeBodyValidationDescriptorCollection">A list of <see cref="ExcludeBodyValidationDescriptor"/>
+        /// <param name="excludeBodyValidationDescriptorCollection">A list of <see cref="ExcludeValidationDescriptor"/>
         /// which are used to get a collection of exclude filters to be applied for filtering model properties during validation.
         /// </param>
         /// <param name="typeFullName">Full name of the type which should be excluded from validation.</param>
-        public static void Add(this IList<ExcludeBodyValidationDescriptor> excludeBodyValidationDescriptorCollection,
+        public static void Add(this IList<ExcludeValidationDescriptor> excludeBodyValidationDescriptorCollection,
                                string typeFullName)
         {
             var filter = new DefaultTypeNameBasedExcludeFilter(typeFullName);
-            excludeBodyValidationDescriptorCollection.Add(new ExcludeBodyValidationDescriptor(filter));
+            excludeBodyValidationDescriptorCollection.Add(new ExcludeValidationDescriptor(filter));
         }
     }
 }

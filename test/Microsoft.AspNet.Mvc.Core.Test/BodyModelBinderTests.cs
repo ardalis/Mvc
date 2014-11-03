@@ -113,9 +113,9 @@ namespace Microsoft.AspNet.Mvc
                 validator = mockValidator.Object;
             }
 
-            var bodyValidationPredicatesProvidwer = new Mock<IBodyValidationExcludeFiltersProvider>();
+            var bodyValidationPredicatesProvidwer = new Mock<IValidationExcludeFiltersProvider>();
             bodyValidationPredicatesProvidwer.SetupGet(o => o.ExcludeFilters)
-                                             .Returns(new List<IExcludeTypeFromBodyValidationFilter>());
+                                             .Returns(new List<IExcludeTypeValidationFilter>());
 
             var binder = new BodyModelBinder(actionContext,
                                              inputFormatterSelector.Object,

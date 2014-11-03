@@ -10,8 +10,8 @@ using Microsoft.Framework.OptionsModel;
 namespace Microsoft.AspNet.Mvc.OptionDescriptors
 {
     /// <inheritdoc />
-    public class DefaultBodyValidationExcludeFiltersProvider
-        : OptionDescriptorBasedProvider<IExcludeTypeFromBodyValidationFilter>, IBodyValidationExcludeFiltersProvider
+    public class DefaultValidationExcludeFiltersProvider
+        : OptionDescriptorBasedProvider<IExcludeTypeValidationFilter>, IValidationExcludeFiltersProvider
     {
         /// <summary>
         /// Initializes a new instance of the DefaultBodyValidationExcludeFiltersProvider class.
@@ -20,15 +20,15 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         /// <param name="typeActivator">An <see cref="ITypeActivator"/> instance used to instantiate types.</param>
         /// <param name="serviceProvider">A <see cref="IServiceProvider"/> instance that retrieves services from the 
         /// service collection.</param>
-        public DefaultBodyValidationExcludeFiltersProvider(IOptions<MvcOptions> optionsAccessor,
+        public DefaultValidationExcludeFiltersProvider(IOptions<MvcOptions> optionsAccessor,
                                               ITypeActivator typeActivator,
                                               IServiceProvider serviceProvider)
-            : base(optionsAccessor.Options.BodyValidationExcludeFilters, typeActivator, serviceProvider)
+            : base(optionsAccessor.Options.ValidationExcludeFilters, typeActivator, serviceProvider)
         {
         }
 
         /// <inheritdoc />
-        public IReadOnlyList<IExcludeTypeFromBodyValidationFilter> ExcludeFilters
+        public IReadOnlyList<IExcludeTypeValidationFilter> ExcludeFilters
         {
             get
             {

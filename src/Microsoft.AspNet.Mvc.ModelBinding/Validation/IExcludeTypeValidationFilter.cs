@@ -6,9 +6,9 @@ using System;
 namespace Microsoft.AspNet.Mvc.ModelBinding
 {
     /// <summary>
-    /// Provides an interface which can be used to decide to exclude a type from body model validation.
+    /// Provides an interface which can be used to decide to exclude a type from model validation.
     /// </summary>
-    public interface IExcludeTypeFromBodyValidationFilter
+    public interface IExcludeTypeValidationFilter
     {
         bool IsTypeExcluded([NotNull] Type propertyType);     
     }

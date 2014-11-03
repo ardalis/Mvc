@@ -354,10 +354,10 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
                     });
             var modelMetadataProvider = new EmptyModelMetadataProvider();
             var excludedValidationTypesPredicate =
-                new List<IExcludeTypeFromBodyValidationFilter>();
+                new List<IExcludeTypeValidationFilter>();
             if (excludedTypes != null)
             {
-                var mockExcludeTypeFilter = new Mock<IExcludeTypeFromBodyValidationFilter>();
+                var mockExcludeTypeFilter = new Mock<IExcludeTypeValidationFilter>();
                 mockExcludeTypeFilter.Setup(o => o.IsTypeExcluded(It.IsAny<Type>()))
                                      .Returns<Type>(excludedType => 
                                                         excludedTypes.Any(t => t.IsAssignableFrom(excludedType)));

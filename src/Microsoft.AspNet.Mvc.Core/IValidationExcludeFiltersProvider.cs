@@ -7,13 +7,13 @@ using Microsoft.AspNet.Mvc.ModelBinding;
 namespace Microsoft.AspNet.Mvc
 {
     /// <summary>
-    /// Provides an activated collection of <see cref="IExcludeTypeFromBodyValidationFilter"/> instances.
+    /// Provides an activated collection of <see cref="IExcludeTypeValidationFilter"/> instances.
     /// </summary>
-    public interface IBodyValidationExcludeFiltersProvider
+    public interface IValidationExcludeFiltersProvider
     {
         /// <summary>
-        /// Gets a collection of activated <see cref="IExcludeTypeFromBodyValidationFilter"/> instances.
+        /// Gets a collection of activated <see cref="IExcludeTypeValidationFilter"/> instances.
         /// </summary>
-        IReadOnlyList<IExcludeTypeFromBodyValidationFilter> ExcludeFilters { get; }
+        IReadOnlyList<IExcludeTypeValidationFilter> ExcludeFilters { get; }
     }
 }

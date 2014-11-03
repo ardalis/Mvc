@@ -7,10 +7,10 @@ using Microsoft.AspNet.Mvc.ModelBinding;
 namespace Microsoft.AspNet.Mvc
 {
     /// <summary>
-    /// Provides an implementation of <see cref="IExcludeTypeFromBodyValidationFilter"/> which can filter 
+    /// Provides an implementation of <see cref="IExcludeTypeValidationFilter"/> which can filter 
     /// based on type full name.
     /// </summary>
-    public class DefaultTypeNameBasedExcludeFilter : IExcludeTypeFromBodyValidationFilter
+    public class DefaultTypeNameBasedExcludeFilter : IExcludeTypeValidationFilter
     {
         private readonly string _registeredTypeFullName;
 

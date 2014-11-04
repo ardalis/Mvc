@@ -57,16 +57,16 @@ namespace Microsoft.AspNet.Mvc.ModelBinding
             ExcludeFromValidationFilters = parentContext.ExcludeFromValidationFilters;
         }
 
-        public ModelMetadata ModelMetadata { get; private set; }
+        public ModelMetadata ModelMetadata { get; }
 
-        public ModelMetadata ContainerMetadata { get; private set; }
+        public ModelMetadata ContainerMetadata { get; }
 
-        public ModelStateDictionary ModelState { get; private set; }
+        public ModelStateDictionary ModelState { get; }
 
-        public IModelMetadataProvider MetadataProvider { get; private set; }
+        public IModelMetadataProvider MetadataProvider { get; }
 
-        public IModelValidatorProvider ValidatorProvider { get; private set; }
+        public IModelValidatorProvider ValidatorProvider { get; }
 
-        public IReadOnlyList<IExcludeTypeValidationFilter> ExcludeFromValidationFilters { get; private set; }
+        public IReadOnlyList<IExcludeTypeValidationFilter> ExcludeFromValidationFilters { get; }
     }
 }

@@ -412,7 +412,8 @@ namespace System.Web.Http
         /// </param>
         public void Validate<TEntity>(TEntity entity, string keyPrefix)
         {
-            var bodyValidationExcludeFiltersProvider = Context.RequestServices.GetRequiredService<IValidationExcludeFiltersProvider>();
+            var bodyValidationExcludeFiltersProvider = Context.RequestServices
+                                                              .GetRequiredService<IValidationExcludeFiltersProvider>();
             var validator = Context.RequestServices.GetRequiredService<IBodyModelValidator>();
             var metadataProvider = Context.RequestServices.GetRequiredService<IModelMetadataProvider>();
             var modelMetadata = metadataProvider.GetMetadataForType(() => entity, typeof(TEntity));

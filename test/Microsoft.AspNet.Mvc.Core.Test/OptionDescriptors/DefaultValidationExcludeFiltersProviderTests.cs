@@ -29,15 +29,16 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
                                                                            serviceProvider.Object);
 
             // Act
-            var binders = provider.ExcludeFilters;
+            var filters = provider.ExcludeFilters;
 
             // Assert
-            Assert.Equal(1, binders.Count);
-            Assert.True(binders[0].IsTypeExcluded(type));
+            Assert.Equal(1, filters.Count);
+            Assert.True(filters[0].IsTypeExcluded(type));
         }
 
         [Theory]
         [InlineData(typeof(BaseType))]
+        [InlineData(typeof(UnRelatedType))]
         [InlineData(typeof(UnRelatedType))]
         public void Add_RegisterDerivedType_BaseAndUnrealatedTypesAreNotExcluded(Type type)
         {
@@ -54,11 +55,11 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
                                                                            serviceProvider.Object);
 
             // Act
-            var binders = provider.ExcludeFilters;
+            var filters = provider.ExcludeFilters;
 
             // Assert
-            Assert.Equal(1, binders.Count);
-            Assert.False(binders[0].IsTypeExcluded(type));
+            Assert.Equal(1, filters.Count);
+            Assert.False(filters[0].IsTypeExcluded(type));
         }
 
         [Theory]
@@ -79,16 +80,17 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
                                                                            serviceProvider.Object);
 
             // Act
-            var binders = provider.ExcludeFilters;
+            var filters = provider.ExcludeFilters;
 
             // Assert
-            Assert.Equal(1, binders.Count);
-            Assert.True(binders[0].IsTypeExcluded(type));
+            Assert.Equal(1, filters.Count);
+            Assert.True(filters[0].IsTypeExcluded(type));
         }
 
         [Theory]
         [InlineData(typeof(BaseType))]
         [InlineData(typeof(UnRelatedType))]
+        [InlineData(typeof(SubNameSpace.UnRelatedType))]
         public void Add_WithTypeName_RegisterDerivedType_BaseAndUnrealatedTypesAreNotExcluded(Type type)
         {
             // Arrange
@@ -104,11 +106,11 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
                                                                            serviceProvider.Object);
 
             // Act
-            var binders = provider.ExcludeFilters;
+            var filters = provider.ExcludeFilters;
 
             // Assert
-            Assert.Equal(1, binders.Count);
-            Assert.False(binders[0].IsTypeExcluded(type));
+            Assert.Equal(1, filters.Count);
+            Assert.False(filters[0].IsTypeExcluded(type));
         }
 
         private class BaseType
@@ -123,4 +125,14 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         {
         }
     }
+
+    namespace SubNameSpace
+    {
+        public class UnRelatedType
+        {
+        }
+    }
 }
+
+
+    

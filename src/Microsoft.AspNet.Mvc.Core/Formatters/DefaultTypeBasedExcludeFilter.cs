@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.Mvc
         /// <summary>
         /// Gets the type which is excluded from validation.
         /// </summary>
-        public Type ExcludedType { get; private set; }
+        public Type ExcludedType { get; }
 
         /// <inheritdoc />
         public bool IsTypeExcluded([NotNull] Type propertyType)

@@ -25,10 +25,10 @@ namespace Microsoft.AspNet.Mvc.OptionDescriptors
         /// <summary>
         /// Creates a new instance of <see cref="ExcludeValidationDescriptor"/>.
         /// </summary>
-        /// <param name="predicateProvider">An instance of <see cref="IExcludeTypeValidationFilter"/>
+        /// <param name="validationFilter">An instance of <see cref="IExcludeTypeValidationFilter"/>
         /// that the descriptor represents.</param>
-        public ExcludeValidationDescriptor([NotNull] IExcludeTypeValidationFilter predicateProvider)
-            : base(predicateProvider)
+        public ExcludeValidationDescriptor([NotNull] IExcludeTypeValidationFilter validationFilter)
+            : base(validationFilter)
         {
         }
     }

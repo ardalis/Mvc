@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.Mvc.Razor
 {
-    public class ExpiringFileInfoCacheTest
+    public class CachedFileSystemTest
     {
         private const string FileName = "myView.cshtml";
 
@@ -84,10 +84,15 @@ namespace Microsoft.AspNet.Mvc.Razor
             CreateFile(FileName);
 
             // Act
-            var fileInfo1 = cache.GetFileInfo(FileName);
-            var fileInfo2 = cache.GetFileInfo(FileName);
+            IFileInfo fileInfo1;
+            IFileInfo fileInfo2;
+            var result1 = cache.TryGetFileInfo(FileName, out fileInfo1);
+            var result2 = cache.TryGetFileInfo(FileName, out fileInfo2);
 
             // Assert
+            Assert.True(result1);
+            Assert.True(result2);
+
             Assert.Same(fileInfo1, fileInfo2);
 
             Assert.Equal(FileName, fileInfo1.Name);
@@ -305,7 +310,7 @@ namespace Microsoft.AspNet.Mvc.Razor
             Assert.Equal(FileName, fileInfo1.Name);
         }
 
-        public class ControllableExpiringFileInfoCache : ExpiringFileInfoCache
+        public class ControllableExpiringFileInfoCache : CachedFileSystem
         {
             public ControllableExpiringFileInfoCache(IOptions<RazorViewEngineOptions> optionsAccessor)
                 : base(optionsAccessor)
@@ -335,6 +340,17 @@ namespace Microsoft.AspNet.Mvc.Razor
                 }
 
                 _internalUtcNow = UtcNow.AddMilliseconds(milliSeconds);
+            }
+
+            public IFileInfo GetFileInfo(string subpath)
+            {
+                IFileInfo fileInfo;
+                if (TryGetFileInfo(subpath, out fileInfo))
+                {
+                    return fileInfo;
+                }
+
+                return null;
             }
         }
 

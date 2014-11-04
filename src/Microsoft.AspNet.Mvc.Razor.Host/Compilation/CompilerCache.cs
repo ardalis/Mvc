@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.Mvc.Razor
                 else if (cacheStatus == CacheEntryStatus.ValidWithIncorrectTimestamp)
                 {
                     // Cache hit, but we need to update the entry
-                    return OnCacheMiss(fileInfo, 
+                    return OnCacheMiss(fileInfo,
                         () => CompilationResult.Successful(cacheEntry.CompiledType));
                 }
 
@@ -56,15 +56,16 @@ namespace Microsoft.AspNet.Mvc.Razor
             }
         }
 
+        /// <inheritdoc />
         public object GetOrAddMetadata([NotNull] RelativeFileInfo fileInfo,
                                        [NotNull] IFileSystem fileSystem,
                                        [NotNull] object key,
-                                       Func<object> valueFactory)
+                                       [NotNull] Func<object> valueFactory)
         {
             var normalizedPath = NormalizePath(fileInfo.RelativePath);
             CompilerCacheEntry cacheEntry;
 
-            if (_cache.TryGetValue(normalizedPath, out cacheEntry) && 
+            if (_cache.TryGetValue(normalizedPath, out cacheEntry) &&
                 GetCacheValidity(cacheEntry, fileSystem, fileInfo) != CacheEntryStatus.Invalid)
             {
                 lock (cacheEntry.Metadata)
@@ -75,10 +76,12 @@ namespace Microsoft.AspNet.Mvc.Razor
                         value = valueFactory();
                         cacheEntry.Metadata[key] = value;
                     }
+
+                    return value;
                 }
             }
 
-            // Indicates that a cache entry does not exist or the entry is invalid.
+            // The cache entry does not exist or the entry is invalid.
             // At this point, simply invoke the valueFactory and do not bother saving the result.
             return valueFactory();
         }
@@ -110,6 +113,7 @@ namespace Microsoft.AspNet.Mvc.Razor
                 {
                     // If a ViewStart entry exists in the cache but doesn't exist on disk it must have been deleted.
                     // If a ViewStart entry does not exist in the cache but exists on disk, we have a new ViewStart entry.
+                    // In either case, we need to recompile the file.
                     return false;
                 }
                 else if (existsOnDisk)

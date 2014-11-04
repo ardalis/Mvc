@@ -34,11 +34,7 @@ namespace Microsoft.AspNet.Mvc.Razor.Test
 
             var razorService = new RazorCompilationService(compiler.Object, host.Object);
 
-            var relativeFileInfo = new RelativeFileInfo()
-            {
-                FileInfo = fileInfo.Object,
-                RelativePath = @"views\index\home.cshtml",
-            };
+            var relativeFileInfo = new RelativeFileInfo(fileInfo.Object, @"views\index\home.cshtml");
 
             // Act
             razorService.Compile(relativeFileInfo);

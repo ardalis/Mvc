@@ -105,6 +105,27 @@ namespace Microsoft.AspNet.Mvc.FunctionalTests
             Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
         }
 
+        [Theory]
+        [InlineData("ContactInfoUsingV3Format", "BEGIN:VCARD#FN:John Williams#END:VCARD#")]
+        [InlineData("ContactInfoUsingV4Format", "BEGIN:VCARD#FN:John Williams#GENDER:M#END:VCARD#")]
+        public async Task ProducesAttribute_WithMediaTypeHavingParameters_IsCaseInsensitiveMatch(string action, 
+                                    string expectedResponseBody)
+        {
+            // Arrange
+            var server = TestServer.Create(_provider, _app);
+            var client = server.CreateClient();
+            expectedResponseBody = expectedResponseBody.Replace("#", Environment.NewLine);
+            
+            // Act
+            var response = await client.GetAsync("http://localhost/ProducesWithMediaTypeParameters/" + action);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var actualResponseBody = await response.Content.ReadAsStringAsync();
+            Assert.Equal(expectedResponseBody, actualResponseBody);
+        }
+
         [Fact]
         public async Task ProducesContentAttribute_OnAction_OverridesTheValueOnClass()
         {

@@ -187,7 +187,7 @@ namespace Microsoft.AspNet.Mvc.HeaderValueAbstractions
                     return false;
                 }
 
-                if (parameterValue2 == null || !parameterValue2.Equals(parameters1[parameterKey]))
+                if (parameterValue2 == null || !parameterValue2.Equals(parameters1[parameterKey], StringComparison.OrdinalIgnoreCase))
                 {
                     return false;
                 }
